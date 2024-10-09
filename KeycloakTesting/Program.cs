@@ -1,6 +1,17 @@
+using KeycloakTesting.Data;
 using KeycloakTesting.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<JsonUserDataService>();
+
+// Register UserDataService with DbContext
+builder.Services.AddScoped<UserDataService>();
+
+
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -9,26 +20,36 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<MappingService>();
 builder.Services.AddControllers();
 
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days.
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//not using an SSL cert, will uncomment if added
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.UseAuthorization();
 
 app.MapRazorPages();
 
 // Map API endpoints
 app.MapControllers();
+
+//removed the below for testing
+//app.MapGet("/api/userdata", ([FromServices] JsonUserDataService userDataService) =>
+//{
+//    return Results.Ok(userDataService.GetAllUserData());
+//});
 
 app.Run();
