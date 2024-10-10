@@ -1,5 +1,6 @@
 ﻿using KeycloakTesting.Models;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace KeycloakTesting.Services
 {
@@ -47,25 +48,103 @@ namespace KeycloakTesting.Services
             }
         }
 
+        public UserData GenerateRandomUserData()
+        {
+            var firstNames = new[] { "James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Nancy", "Daniel", "Lisa", "Matthew", "Betty" };
+            var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez" };
+            var domains = new[] { "example.com", "test.com", "demo.com", "mail.com", "sample.net" };
+            var streetNames = new[] { "Main St", "High St", "Maple Ave", "Oak Rd", "Pine Ln", "Cedar Blvd", "Elm St", "Walnut Dr", "Birch Ct", "Ash St", "Cherry Ave", "Dogwood Rd", "Fir Ln", "Grove Blvd", "Hickory St", "Ivy Dr", "Juniper Ct", "Kent Ave", "Linden Rd", "Magnolia Ln", "Nutmeg Blvd", "Olive St", "Poplar Ave", "Quince Rd", "Redwood Ln", "Sycamore Blvd" };
+            var cities = new[] { "Springfield", "Riverside", "Greenville", "Fairview", "Madison", "Georgetown", "Arlington", "Ashland", "Burlington", "Clinton", "Dayton", "Franklin", "Hamilton", "Milton", "Newark", "Oxford", "Princeton", "Salem", "Trenton", "Winchester", "York", "Zanesville", "Lexington", "Bloomington", "Cleveland", "Dover" };
+            var states = new[] { "NY", "CA", "TX", "FL", "IL", "PA", "OH", "GA", "NC", "MI", "NJ", "VA", "WA", "AZ", "MA", "TN", "IN", "MO", "MD", "WI", "CO", "MN", "SC", "AL", "LA" };
+            var accessLevels = new[] { "Public", "Confidential", "Secret", "TopSecret" }; // Must match enum names exactly
 
-        public List<UserData> GetAllUserData()
-             {
+            var random = new Random();
+
+            string firstName = firstNames[random.Next(firstNames.Length)];
+            string lastName = lastNames[random.Next(lastNames.Length)];
+            string fullName = $"{firstName} {lastName}";
+            string userEmail = $"{random.Next(1000, 9999)}@{domains[random.Next(domains.Length)]}";
+            string phoneNum = $"({random.Next(200, 999)}) {random.Next(200, 999)}-{random.Next(1000, 9999)}";
+            string address = $"{random.Next(100, 9999)} {streetNames[random.Next(streetNames.Length)]}, {cities[random.Next(cities.Length)]}, {states[random.Next(states.Length)]} {random.Next(10000, 99999)}";
+
+            string accessLevelString = accessLevels[random.Next(accessLevels.Length)];
+            AccessLevel accessLevelEnum = Enum.Parse<AccessLevel>(accessLevelString);
+
+            return new UserData
+            {
+                FullName = fullName,
+                UserEmail = userEmail,
+                PhoneNum = phoneNum,
+                Address = address,
+                AccessLevel = accessLevelEnum
+            };
+        }
+
+        public List<UserData> GetUserDataByAccessLevel(AccessLevel accessLevel)
+        {
             lock (_lock)
             {
                 try
                 {
+                    var allUserData = GetAllUserData();
+                    var filteredData = allUserData
+                        .Where(u => u.AccessLevel == accessLevel)
+                        .ToList();
+                    return filteredData;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error getting user data by access level.");
+                    throw;
+                }
+            }
+        }
+
+        public List<UserData> GetAllUserData()
+        {
+            lock (_lock)
+            {
+                try
+                {
+                    if (!File.Exists(_filePath))
+                    {
+                        return new List<UserData>();
+                    }
+
                     var json = File.ReadAllText(_filePath);
-                    return JsonSerializer.Deserialize<List<UserData>>(json) ?? new List<UserData>();
+                    var options = new JsonSerializerOptions
+                    {
+                        Converters = { new JsonStringEnumConverter() }
+                    };
+                    var data = JsonSerializer.Deserialize<List<UserData>>(json, options);
+                    return data ?? new List<UserData>();
                 }
-                catch (IOException ex)
+                catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error reading user data from JSON file.");
-                    throw new Exception("Error reading user data.", ex);
+                    _logger.LogError(ex, "Error reading user data from file.");
+                    throw;
                 }
-                catch (JsonException ex)
+            }
+        }
+
+        public void UpdateUserData(List<UserData> userDataList)
+        {
+            lock (_lock)
+            {
+                try
                 {
-                    _logger.LogError(ex, "Error deserializing user data from JSON file.");
-                    throw new Exception("Error deserializing user data.", ex);
+                    var options = new JsonSerializerOptions
+                    {
+                        WriteIndented = true,
+                        Converters = { new JsonStringEnumConverter() }
+                    };
+                    var json = JsonSerializer.Serialize(userDataList, options);
+                    File.WriteAllText(_filePath, json);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error writing user data to file.");
+                    throw;
                 }
             }
         }
@@ -97,32 +176,13 @@ namespace KeycloakTesting.Services
 
         private void WriteToFile(List<UserData> data)
         {
-            var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Converters = { new JsonStringEnumConverter() }
+            };
+            var json = JsonSerializer.Serialize(data, options);
             File.WriteAllText(_filePath, json);
         }
-        public void UpdateUserData(List<UserData> updatedList)
-        {
-            ArgumentNullException.ThrowIfNull(updatedList);
-
-            lock (_lock)
-            {
-                try
-                {
-                    WriteToFile(updatedList);
-                }
-                catch (IOException ex)
-                {
-                    _logger.LogError(ex, "Error writing user data to JSON file.");
-                    throw new Exception("Error writing user data.", ex);
-                }
-                catch (JsonException ex)
-                {
-                    _logger.LogError(ex, "Error serializing user data to JSON file.");
-                    throw new Exception("Error serializing user data.", ex);
-                }
-            }
-        }
-
-
     }
 }

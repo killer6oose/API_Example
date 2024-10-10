@@ -3,6 +3,7 @@ using KeycloakTesting.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +11,6 @@ builder.Services.AddSingleton<JsonUserDataService>();
 
 // Register UserDataService with DbContext
 builder.Services.AddScoped<UserDataService>();
-
-
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -21,6 +20,10 @@ builder.Services.AddSingleton<MappingService>();
 builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 var app = builder.Build();
 

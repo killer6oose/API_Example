@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace KeycloakTesting.Models
 {
@@ -18,7 +19,9 @@ namespace KeycloakTesting.Models
 
         [Required]
         public string Address { get; set; }
-
+        [Required]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public AccessLevel AccessLevel { get; set; }
         // Add additional user-related properties with validation as needed
     }
 }

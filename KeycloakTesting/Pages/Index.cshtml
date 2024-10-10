@@ -7,45 +7,47 @@
 <h1>@ViewData["Title"]</h1>
 
 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-
 {
     <div class="alert alert-danger">
         @Model.ErrorMessage
     </div>
 }
 
-<!-- Button to Open the Modal -->
-<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createUserModal">
-    Create New User
-</button>
+<!-- Buttons -->
+<div class="mb-3">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+        Create New User
+    </button>
+    <button type="button" class="btn btn-warning" id="generateRecordsButton">
+        Generate 50 New Records
+    </button>
+    <a href="/scripts/CreateRandomUserData.ps1" class="btn btn-info" download>
+        Download PowerShell Script
+    </a>
+</div>
 
 <h2>Existing User Data</h2>
 <table class="table table-striped" id="userDataTable">
     <thead>
         <tr>
-            <th>Full Name</th>
-            <th>Email</th>
-            <th>Phone Number</th>
-            <th>Address</th>
+            <th>Full Name<br><input type="text" class="column-search form-control" placeholder="Search Full Name" /></th>
+            <th>Email<br><input type="text" class="column-search form-control" placeholder="Search Email" /></th>
+            <th>Phone Number<br><input type="text" class="column-search form-control" placeholder="Search Phone" /></th>
+            <th>Address<br><input type="text" class="column-search form-control" placeholder="Search Address" /></th>
+            <th>Access Level<br>
+                <select class="column-search form-control">
+                    <option value="">All</option>
+                    <option value="Public">Public</option>
+                    <option value="Confidential">Confidential</option>
+                    <option value="Secret">Secret</option>
+                    <option value="TopSecret">TopSecret</option>
+                </select>
+            </th>
             <th>Actions</th>
-            <!-- Add additional headers as needed -->
         </tr>
     </thead>
     <tbody>
-        @foreach (var user in Model.UserDataList)
-
-        {
-            <tr>
-                <td>@user.FullName</td>
-                <td>@user.UserEmail</td>
-                <td>@user.PhoneNum</td>
-                <td>@user.Address</td>
-                <td>
-                    <button class="btn btn-danger btn-sm delete-button" data-index="@((Model.UserDataList.IndexOf(user)))">Delete</button>
-                </td>
-                <!-- Add additional columns as needed -->
-            </tr>
-        }
+        <!-- Data will be dynamically inserted here -->
     </tbody>
 </table>
 
@@ -77,6 +79,16 @@
                         <label for="Address" class="form-label">Address</label>
                         <input type="text" id="Address" name="Address" class="form-control" required />
                     </div>
+                    <div class="mb-3">
+                        <label for="AccessLevel" class="form-label">Access Level</label>
+                        <select id="AccessLevel" name="AccessLevel" class="form-control" required>
+                            <option value="">Select Access Level</option>
+                            <option value="Public">Public</option>
+                            <option value="Confidential">Confidential</option>
+                            <option value="Secret">Secret</option>
+                            <option value="TopSecret">TopSecret</option>
+                        </select>
+                    </div>
                     <!-- Add additional fields as needed -->
                 </form>
             </div>
@@ -84,6 +96,53 @@
                 <!-- Modal Footer Buttons -->
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <button type="button" id="submitCreateForm" class="btn btn-success">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Update User Modal -->
+<div class="modal fade" id="updateUserModal" tabindex="-1" aria-labelledby="updateUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update User Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Form Inside Modal -->
+                <form id="updateForm">
+                    <input type="hidden" id="UpdateIndex" />
+                    <div class="mb-3">
+                        <label for="UpdateFullName" class="form-label">Full Name</label>
+                        <input type="text" id="UpdateFullName" name="UpdateFullName" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateUserEmail" class="form-label">Email Address</label>
+                        <input type="email" id="UpdateUserEmail" name="UpdateUserEmail" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdatePhoneNum" class="form-label">Phone Number</label>
+                        <input type="tel" id="UpdatePhoneNum" name="UpdatePhoneNum" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateAddress" class="form-label">Address</label>
+                        <input type="text" id="UpdateAddress" name="UpdateAddress" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateAccessLevel" class="form-label">Access Level</label>
+                        <select id="UpdateAccessLevel" name="UpdateAccessLevel" class="form-control" required>
+                            <option value="Public">Public</option>
+                            <option value="Confidential">Confidential</option>
+                            <option value="Secret">Secret</option>
+                            <option value="TopSecret">TopSecret</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <!-- Modal Footer Buttons -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="submitUpdateForm" class="btn btn-success">Update</button>
             </div>
         </div>
     </div>
@@ -107,24 +166,66 @@
                     type: 'GET',
                     dataType: 'json',
                     success: function (data) {
-                        var tbody = $('#userDataTable tbody');
-                        tbody.empty(); // Clear existing data
+                        // Destroy existing DataTable if it exists
+                        if ($.fn.DataTable.isDataTable('#userDataTable')) {
+                            $('#userDataTable').DataTable().destroy();
+                        }
 
+                        // Clear existing data
+                        $('#userDataTable tbody').empty();
+
+                        // Populate the table body with data
                         data.forEach(function (user, index) {
                             var row = '<tr>' +
                                 '<td>' + user.fullName + '</td>' +
                                 '<td>' + user.userEmail + '</td>' +
                                 '<td>' + user.phoneNum + '</td>' +
                                 '<td>' + user.address + '</td>' +
+                                '<td>' + user.accessLevel + '</td>' + // accessLevel is now a string
                                 '<td>' +
-                                '<button class="btn btn-danger btn-sm delete-button" data-index="' + index + '">Delete</button>' +
+                                    '<button class="btn btn-primary btn-sm update-button" data-index="' + index + '">Update</button> ' +
+                                    '<button class="btn btn-danger btn-sm delete-button" data-index="' + index + '">Delete</button>' +
                                 '</td>' +
                                 '</tr>';
-                            tbody.append(row);
+                            $('#userDataTable tbody').append(row);
+                        });
+
+                        // Initialize DataTable with column-specific filtering
+                        var table = $('#userDataTable').DataTable({
+                            "columnDefs": [
+                                { "orderable": false, "targets": 5 }, // Disable sorting on the Actions column
+                                { "searchable": false, "targets": 5 } // Disable searching on the Actions column
+                            ],
+                            initComplete: function () {
+                                var api = this.api();
+
+                                // For each column
+                                api.columns().every(function () {
+                                    var that = this;
+
+                                    // Text input filters
+                                    $('input', this.header()).on('keyup change clear', function () {
+                                        if (that.search() !== this.value) {
+                                            that.search(this.value).draw();
+                                        }
+                                    });
+
+                                    // Select dropdown filters
+                                    $('select', this.header()).on('change', function () {
+                                        var val = $.fn.dataTable.util.escapeRegex(
+                                            $(this).val()
+                                        );
+
+                                        that
+                                            .search(val ? '^' + val + '$' : '', true, false)
+                                            .draw();
+                                    });
+                                });
+                            }
                         });
                     },
                     error: function (xhr, status, error) {
-                        alert('Failed to load user data: ' + error);
+                        console.error('Failed to load user data:', error);
                     }
                 });
             }
@@ -132,14 +233,33 @@
             // Initial load of user data
             loadUserData();
 
+            // Handle Generate Records button click
+            $('#generateRecordsButton').click(function () {
+                if (confirm('This will delete all existing records and generate 50 new ones. Proceed?')) {
+                    $.ajax({
+                        url: '/api/UserData/generate',
+                        type: 'POST',
+                        success: function (response) {
+                            alert(response.Message);
+                            // Refresh the table
+                            loadUserData();
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error generating records:', error);
+                            alert('Failed to generate records. Please check the console for more details.');
+                        }
+                    });
+                }
+            });
+
             // Handle form submission inside the modal
             $('#submitCreateForm').click(function () {
                 var formData = {
                     FullName: $('#FullName').val(),
                     UserEmail: $('#UserEmail').val(),
                     PhoneNum: $('#PhoneNum').val(),
-                    Address: $('#Address').val()
-                    // Include additional fields as needed
+                    Address: $('#Address').val(),
+                    AccessLevel: $('#AccessLevel').val()
                 };
 
                 $.ajax({
@@ -147,36 +267,114 @@
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(formData),
-                    success: function (data, status, xhr) {
-                        alert('User data created successfully!');
-                        // Refresh the table
-                        loadUserData();
-                        // Reset the form
-                        $('#createForm')[0].reset();
+                    success: function () {
                         // Close the modal
                         $('#createUserModal').modal('hide');
+                        // Refresh the table
+                        loadUserData(function () {
+                            // Highlight the new row
+                            var lastRow = $('#userDataTable tbody tr').last();
+                            lastRow.addClass('bg-success');
+                            setTimeout(function () {
+                                lastRow.removeClass('bg-success');
+                            }, 2000);
+                        });
+                        // Reset the form
+                        $('#createForm')[0].reset();
                     },
                     error: function (xhr, status, error) {
-                        var errorMessage = 'Error: ' + (xhr.responseJSON?.message || error);
-                        alert(errorMessage);
+                        console.error('Error creating user data:', error);
+                        alert('Failed to create user data. Please check the console for more details.');
+                    }
+                });
+            });
+
+            // Handle update form submission
+            $('#submitUpdateForm').click(function () {
+                var index = $('#UpdateIndex').val();
+                var formData = {
+                    FullName: $('#UpdateFullName').val(),
+                    UserEmail: $('#UpdateUserEmail').val(),
+                    PhoneNum: $('#UpdatePhoneNum').val(),
+                    Address: $('#UpdateAddress').val(),
+                    AccessLevel: $('#UpdateAccessLevel').val()
+                };
+
+                $.ajax({
+                    url: '/api/UserData/' + index,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function () {
+                        // Close the modal
+                        $('#updateUserModal').modal('hide');
+                        // Refresh the table
+                        loadUserData(function () {
+                            // Highlight the updated row
+                            var updatedRow = $('#userDataTable tbody tr').eq(index);
+                            updatedRow.addClass('bg-warning');
+                            setTimeout(function () {
+                                updatedRow.removeClass('bg-warning');
+                            }, 2000);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Failed to update user data:', error);
+                        alert('Failed to update user data. Please check the console for more details.');
+                    }
+                });
+            });
+
+            // Handle update button clicks
+            $('#userDataTable tbody').on('click', '.update-button', function () {
+                var index = $(this).data('index');
+
+                // Get the user data from the server or from the data already loaded
+                $.ajax({
+                    url: '/api/UserData/' + index,
+                    type: 'GET',
+                    success: function (user) {
+                        // Populate the form fields with the existing data
+                        $('#UpdateIndex').val(index);
+                        $('#UpdateFullName').val(user.fullName);
+                        $('#UpdateUserEmail').val(user.userEmail);
+                        $('#UpdatePhoneNum').val(user.phoneNum);
+                        $('#UpdateAddress').val(user.address);
+                        $('#UpdateAccessLevel').val(user.accessLevel);
+
+                        // Show the update modal
+                        $('#updateUserModal').modal('show');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Failed to load user data for update:', error);
+                        alert('Failed to load user data for update. Please check the console for more details.');
                     }
                 });
             });
 
             // Handle delete button clicks
-            $('#userDataTable').on('click', '.delete-button', function () {
+            $('#userDataTable tbody').on('click', '.delete-button', function () {
                 var index = $(this).data('index');
+                var row = $(this).closest('tr');
 
-                if (confirm('Are you sure you want to delete this record?')) {
+                if (confirm('Are you sure you want to delete this user?')) {
                     $.ajax({
                         url: '/api/UserData/' + index,
                         type: 'DELETE',
                         success: function () {
-                            alert('User data deleted successfully!');
-                            loadUserData();
+                            // Replace the row content with "Record deleted"
+                            row.children('td').fadeOut(500, function () {
+                                $(this).html('Record deleted').fadeIn(500, function () {
+                                    // Fade out the entire row
+                                    row.delay(1000).fadeOut(500, function () {
+                                        row.remove();
+                                    });
+                                });
+                            });
                         },
                         error: function (xhr, status, error) {
-                            alert('Error deleting user data: ' + error);
+                            console.error('Error deleting user data:', error);
+                            alert('Failed to delete user data. Please check the console for more details.');
                         }
                     });
                 }
