@@ -3,13 +3,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>@ViewData["Title"] - YourAppName</title>
+    <title>@ViewData["Title"] - API Data Experiment</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- Bootstrap CSS (Using Darkly Theme from Bootswatch) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/darkly/bootstrap.min.css" />
 
-    <!-- Custom Styles -->
+    <!-- Prism.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" />
+
+       <!-- Custom Styles -->
     <style>
         /* Spinner Overlay Styles */
         .spinner-overlay {
@@ -24,8 +28,7 @@
             justify-content: center;
             z-index: 1050; /* Above modal backdrop */
         }
-    </style>
-    <style>
+
         /* Style the filter inputs and selects */
         thead input.column-search,
         thead select.column-search {
@@ -35,45 +38,120 @@
             padding: 3px;
             margin-top: 5px;
         }
-    </style>
+    /* Adjust the position and appearance of the Prism.js toolbar */
+    .prism-toolbar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 2px;
+    }
 
+    /* Style the Copy button */
+    .prism-toolbar .prism-toolbar-button {
+        background-color: #343a40; /* Dark background */
+        color: #ffffff; /* White text */
+        border: none;
+        padding: 2px 2px;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+    .prism-toolbar .prism-toolbar-button:hover {
+        background-color: #495057; /* Slightly lighter on hover */
+    }
+
+    /* Ensure the toolbar is visible over code blocks */
+    pre[class*="language-"] {
+        position: relative;
+        padding-top: 2.5rem; /* Adjust padding to make room for the toolbar */
+    }
+</style>
+
+  <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
     @RenderSection("Styles", false)
 </head>
 <body>
+    @{
+        // Determine the current page and set the download button text and modal content accordingly
+        string downloadButtonText = "Download Script";
+        string modalTitle = "Download PowerShell Script";
+        string modalBodyText = "Please change the file type from <code>.txt</code> to <code>.ps1</code> after downloading to execute the script.";
+        string currentPage = ViewContext.RouteData.Values["page"] as string ?? "";
+
+        bool showDownloadButton = false;
+
+        if (currentPage.Contains("/ServiceData"))
+        {
+            downloadButtonText = "Download ServiceData Script";
+            modalTitle = "Download ServiceData Script";
+            modalBodyText = "You are about to download the ServiceData PowerShell script. Please change the file type from <code>.txt</code> to <code>.ps1</code> after downloading to execute the script.";
+            showDownloadButton = true;
+        }
+        else if (currentPage.Contains("/UserData") || currentPage == "/")
+        {
+            downloadButtonText = "Download UserData Script";
+            modalTitle = "Download UserData Script";
+            modalBodyText = "You are about to download the UserData PowerShell script. Please change the file type from <code>.txt</code> to <code>.ps1</code> after downloading to execute the script.";
+            showDownloadButton = true;
+        }
+        else
+        {
+            // For other pages, do not show the download button
+            showDownloadButton = false;
+        }
+    }
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <!-- Brand -->
-            <a class="navbar-brand" href="#">User Data Experiment</a>
+            <a class="navbar-brand" href="#">API Data Experiment</a>
             <!-- Toggler/collapsible Button -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <!-- Navbar Links -->
-            <div class="collapse navbar-collapse" id="navbarColor01">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/">
-                            Home
-                            <span class="visually-hidden">(current)</span>
-                        </a>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <!-- Home Navigation Item -->
+                    <li class="nav-item @(currentPage == "/Index" || currentPage == "/" ? "active" : "")">
+                        <a class="nav-link" href="/">Home</a>
                     </li>
-                    <!-- Add additional nav items as needed -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="privacy">Privacy</a>
+
+                    <!-- User Data Navigation Item -->
+                    <li class="nav-item @(currentPage == "/UserData" ? "active" : "")">
+                        <a class="nav-link" href="/UserData">User Data</a>
+                    </li>
+
+                    <!-- Service Data Navigation Item -->
+                    <li class="nav-item @(currentPage == "/ServiceData" ? "active" : "")">
+                        <a class="nav-link" href="/ServiceData">Service Data</a>
+                    </li>
+
+                    <!-- Contact Navigation Item -->
+                    <li class="nav-item @(currentPage == "/Contact" ? "active" : "")">
+                        <a class="nav-link" href="/Contact">Contact Us</a>
                     </li>
                 </ul>
-                <form class="d-flex">
-        <!-- Source Code Button -->
-                    <a class="btn btn-secondary my-2 my-sm-0" href="https://github.com/killer6oose/KeycloakTesting" target="_blank">Source Code</a>
-                  </form>
-                <!-- Optional Search Form 
-                <form class="d-flex" role="search">
-                  <input class="form-control me-sm-2" type="search" placeholder="Search">
-                    <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
-                </form>-->
+                <!-- Align the buttons to the right -->
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item me-2">
+                        <!-- Source Code Button -->
+                        <a class="btn btn-secondary" href="https://github.com/killer6oose/apiexample" target="_blank">Source Code</a>
+                    </li>
+                    <!-- Conditionally Render Download Script Button -->
+                    @if (showDownloadButton)
+                    {
+                        <li class="nav-item">
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#downloadModal">
+                                @downloadButtonText
+                            </button>
+                        </li>
+                    }
+                </ul>
+
             </div>
         </div>
     </nav>
@@ -92,13 +170,110 @@
         </div>
     </div>
 
-    <!-- jQuery Library -->
+    <!-- Footer -->
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container">
+            <span class="text-muted">© 2024 - User & Service Data API Application by CronoTech Consulting LLC</span>
+        </div>
+    </footer>
+
+    <!-- Download Modal -->
+    <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- Modal Title -->
+                    <h5 class="modal-title" id="downloadModalLabel">@modalTitle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Modal Body -->
+                    <p>@Html.Raw(modalBodyText)</p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="acknowledgeCheckbox">
+                        <label class="form-check-label" for="acknowledgeCheckbox">
+                            I acknowledge that CronoTech Consulting LLC is not responsible for how scripts may function on my system. I will inspect the script, and understand its functionality, prior to running it. I accept all liability for downloading and running this script.
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- Modal Footer Buttons -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <!-- Disabled until checkbox is checked -->
+                    <a href="#" id="downloadScriptButton" class="btn btn-info disabled" download>
+                        Download
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <!-- jQuery Library -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Bootstrap Bundle JS (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    @RenderSection("Scripts", false)
+
+    @RenderSection("Scripts", required: false)
+
+        <!-- Prism.js Core -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+<!-- Prism.js Language Components -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-http.min.js"></script>
+
+<!-- Prism.js Plugins -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+
+    <!-- Modal Script -->
+    <script>
+        $(document).ready(function () {
+            // Disable the Download button initially
+            $('#downloadScriptButton').addClass('disabled');
+
+            // Handle the checkbox change event
+            $('#acknowledgeCheckbox').change(function () {
+                if ($(this).is(':checked')) {
+                    // Enable the Download button
+                    $('#downloadScriptButton').removeClass('disabled');
+                } else {
+                    // Disable the Download button
+                    $('#downloadScriptButton').addClass('disabled');
+                }
+            });
+            // Set the download link based on the current page
+            $('#downloadModal').on('show.bs.modal', function (event) {
+                var currentPage = window.location.pathname;
+                var downloadLink = '';
+                var fileName = '';
+
+                if (currentPage.includes('/ServiceData')) {
+                    downloadLink = '/scripts/CreateRandomServiceData.ps1.txt';
+                    fileName = 'CreateRandomServiceData.ps1';
+                } else if (currentPage.includes('/UserData')) {
+                    downloadLink = '/scripts/CreateRandomUserData.ps1.txt';
+                    fileName = 'CreateRandomUserData.ps1';
+                } else {
+                    // Default case or handle other pages
+                }
+
+                $('#downloadScriptButton').attr('href', downloadLink);
+                // Set the download attribute to rename the file upon download
+                $('#downloadScriptButton').attr('download', fileName);
+
+                // Reset the checkbox and disable the button
+                $('#acknowledgeCheckbox').prop('checked', false);
+                $('#downloadScriptButton').addClass('disabled');
+            });
+        });
+    </script>
+
 </body>
 </html>

@@ -7,21 +7,22 @@ namespace KeycloakTesting.Models
     {
         [Required]
         [Phone]
-        public string PhoneNum { get; set; }
+        public string? PhoneNum { get; set; }
 
         [Required]
         [EmailAddress]
-        public string UserEmail { get; set; }
+        public string? UserEmail { get; set; }
 
         [Required]
         [StringLength(100, MinimumLength = 2)]
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
         [Required]
-        public string Address { get; set; }
+        public string? Address { get; set; }
+
         [Required]
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public AccessLevel AccessLevel { get; set; }
-        // Add additional user-related properties with validation as needed
     }
+
 }

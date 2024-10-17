@@ -1,0 +1,405 @@
+﻿@page
+@model KeycloakTesting.Pages.ServiceDataModel
+@{
+    ViewData["Title"] = "Service Data Management";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @Model.ErrorMessage
+    </div>
+}
+
+<!-- Buttons -->
+<div class="mb-3">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createServiceModal">
+        Create New Service
+    </button>
+    <button type="button" class="btn btn-warning" id="generateServiceRecordsButton">
+        Generate 50 New Service Records
+    </button>
+    
+</div>
+
+<h2>Existing Service Data</h2>
+<table class="table table-striped" id="serviceDataTable">
+    <thead>
+        <tr>
+            <!-- Updated Service Filter as Dropdown -->
+            <th>
+                Service<br>
+                <select class="column-search form-control">
+                    <option value="">All</option>
+                    <option value="Server">Server</option>
+                    <option value="Telephone">Telephone</option>
+                    <option value="Computer">Computer</option>
+                    <option value="Printer">Printer</option>
+                    <option value="Router">Router</option>
+                </select>
+            </th>
+            <th>Address<br><input type="text" class="column-search form-control" placeholder="Search Address" /></th>
+            <th>IP Address<br><input type="text" class="column-search form-control" placeholder="Search IP Address" /></th>
+            <th>IP Gateway<br><input type="text" class="column-search form-control" placeholder="Search IP Gateway" /></th>
+            <th>
+                Access Level<br>
+                <select class="column-search form-control">
+                    <option value="">All</option>
+                    <option value="Public">Public</option>
+                    <option value="Confidential">Confidential</option>
+                    <option value="Secret">Secret</option>
+                    <option value="TopSecret">TopSecret</option>
+                </select>
+            </th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data will be dynamically inserted here -->
+    </tbody>
+</table>
+
+<!-- Modal Popup for Creating New Service -->
+<div class="modal fade" id="createServiceModal" tabindex="-1" aria-labelledby="createServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Service Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Form Inside Modal -->
+                <form id="createServiceForm">
+                    <div class="mb-3">
+                        <label for="Service" class="form-label">Service</label>
+                        <select id="Service" name="Service" class="form-control" required>
+                            <option value="">Select Service</option>
+                            <option value="Server">Server</option>
+                            <option value="Telephone">Telephone</option>
+                            <option value="Computer">Computer</option>
+                            <option value="Printer">Printer</option>
+                            <option value="Router">Router</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Address" class="form-label">Address</label>
+                        <input type="text" id="Address" name="Address" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="IPAddress" class="form-label">IP Address</label>
+                        <input type="text" id="IPAddress" name="IPAddress" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="IPGateway" class="form-label">IP Gateway</label>
+                        <input type="text" id="IPGateway" name="IPGateway" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="AccessLevel" class="form-label">Access Level</label>
+                        <select id="AccessLevel" name="AccessLevel" class="form-control" required>
+                            <option value="">Select Access Level</option>
+                            <option value="Public">Public</option>
+                            <option value="Confidential">Confidential</option>
+                            <option value="Secret">Secret</option>
+                            <option value="TopSecret">TopSecret</option>
+                        </select>
+                    </div>
+                    <!-- Add additional fields as needed -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <!-- Modal Footer Buttons -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="submitCreateServiceForm" class="btn btn-success">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Service Modal -->
+<div class="modal fade" id="updateServiceModal" tabindex="-1" aria-labelledby="updateServiceModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Service Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Form Inside Modal -->
+                <form id="updateServiceForm">
+                    <input type="hidden" id="UpdateServiceIndex" />
+                    <div class="mb-3">
+                        <label for="UpdateService" class="form-label">Service</label>
+                        <select id="UpdateService" name="UpdateService" class="form-control" required>
+                            <option value="">Select Service</option>
+                            <option value="Server">Server</option>
+                            <option value="Telephone">Telephone</option>
+                            <option value="Computer">Computer</option>
+                            <option value="Printer">Printer</option>
+                            <option value="Router">Router</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateAddress" class="form-label">Address</label>
+                        <input type="text" id="UpdateAddress" name="UpdateAddress" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateIPAddress" class="form-label">IP Address</label>
+                        <input type="text" id="UpdateIPAddress" name="UpdateIPAddress" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateIPGateway" class="form-label">IP Gateway</label>
+                        <input type="text" id="UpdateIPGateway" name="UpdateIPGateway" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdateAccessLevel" class="form-label">Access Level</label>
+                        <select id="UpdateAccessLevel" name="UpdateAccessLevel" class="form-control" required>
+                            <option value="Public">Public</option>
+                            <option value="Confidential">Confidential</option>
+                            <option value="Secret">Secret</option>
+                            <option value="TopSecret">TopSecret</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <!-- Modal Footer Buttons -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="submitUpdateServiceForm" class="btn btn-success">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- JavaScript Code for Service Data Management -->
+    <script>
+        $(document).ready(function () {
+            // Show spinner on AJAX start, hide on AJAX complete
+            $(document).ajaxStart(function () {
+                $('#loadingSpinner').show();
+            }).ajaxStop(function () {
+                $('#loadingSpinner').hide();
+            });
+
+            // Function to load service data and populate the table
+            function loadServiceData(callback) {
+                $.ajax({
+                    url: '/api/ServiceData',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        // Destroy existing DataTable if it exists
+                        if ($.fn.DataTable.isDataTable('#serviceDataTable')) {
+                            $('#serviceDataTable').DataTable().destroy();
+                        }
+
+                        // Clear existing data
+                        $('#serviceDataTable tbody').empty();
+
+                        // Populate the table body with data
+                        data.forEach(function (service, index) {
+                            var row = '<tr>' +
+                                '<td>' + service.service + '</td>' +
+                                '<td>' + service.address + '</td>' +
+                                '<td>' + service.ipAddress + '</td>' +
+                                '<td>' + service.ipGateway + '</td>' +
+                                '<td>' + service.accessLevel + '</td>' +
+                                '<td>' +
+                                '<button class="btn btn-primary btn-sm update-service-button" data-index="' + index + '">Update</button> ' +
+                                '<button class="btn btn-danger btn-sm delete-service-button" data-index="' + index + '">Delete</button>' +
+                                '</td>' +
+                                '</tr>';
+                            $('#serviceDataTable tbody').append(row);
+                        });
+
+                        // Initialize DataTable with column-specific filtering
+                        var table = $('#serviceDataTable').DataTable({
+                            "columnDefs": [
+                                { "orderable": false, "targets": 5 }, // Disable sorting on the Actions column
+                                { "searchable": false, "targets": 5 } // Disable searching on the Actions column
+                            ],
+                            initComplete: function () {
+                                var api = this.api();
+
+                                // For each column
+                                api.columns().every(function () {
+                                    var that = this;
+
+                                    // Text input filters
+                                    $('input', this.header()).on('keyup change clear', function () {
+                                        if (that.search() !== this.value) {
+                                            that.search(this.value).draw();
+                                        }
+                                    });
+
+                                    // Select dropdown filters
+                                    $('select', this.header()).on('change', function () {
+                                        var val = $.fn.dataTable.util.escapeRegex(
+                                            $(this).val()
+                                        );
+
+                                        that
+                                            .search(val ? '^' + val + '$' : '', true, false)
+                                            .draw();
+                                    });
+                                });
+                            }
+                        });
+
+                        // Execute callback if provided
+                        if (typeof callback === 'function') {
+                            callback();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Failed to load service data:', error);
+                        alert('Failed to load service data. Please check the console for more details.');
+                    }
+                });
+            }
+
+            // Initial load of service data
+            loadServiceData();
+
+            // Handle Generate Records button click
+            $('#generateServiceRecordsButton').click(function () {
+                if (confirm('This will delete all existing service records and generate 50 new ones. Proceed?')) {
+                    $.ajax({
+                        url: '/api/ServiceData/generate',
+                        type: 'POST',
+                        success: function (response) {
+                            alert(response.Message);
+                            // Refresh the table
+                            loadServiceData();
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error generating service records:', error);
+                            alert('Failed to generate service records. Please check the console for more details.');
+                        }
+                    });
+                }
+            });
+
+            // Handle form submission inside the create modal
+            $('#submitCreateServiceForm').click(function () {
+                var formData = {
+                    Service: $('#Service').val(),
+                    Address: $('#Address').val(),
+                    IPAddress: $('#IPAddress').val(),
+                    IPGateway: $('#IPGateway').val(),
+                    AccessLevel: $('#AccessLevel').val()
+                };
+
+                $.ajax({
+                    url: '/api/ServiceData',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function () {
+                        // Close the modal
+                        $('#createServiceModal').modal('hide');
+                        // Refresh the table
+                        loadServiceData();
+                        // Reset the form
+                        $('#createServiceForm')[0].reset();
+                        alert('Service data created successfully.');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error creating service data:', error);
+                        alert('Failed to create service data. Please check the console for more details.');
+                    }
+                });
+            });
+
+            // Handle update form submission
+            $('#submitUpdateServiceForm').click(function () {
+                var index = $('#UpdateServiceIndex').val();
+                var formData = {
+                    Service: $('#UpdateService').val(),
+                    Address: $('#UpdateAddress').val(),
+                    IPAddress: $('#UpdateIPAddress').val(),
+                    IPGateway: $('#UpdateIPGateway').val(),
+                    AccessLevel: $('#UpdateAccessLevel').val()
+                };
+
+                $.ajax({
+                    url: '/api/ServiceData/' + index,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function () {
+                        // Close the modal
+                        $('#updateServiceModal').modal('hide');
+                        // Refresh the table
+                        loadServiceData();
+                        alert('Service data updated successfully.');
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Failed to update service data:', error);
+                        alert('Failed to update service data. Please check the console for more details.');
+                    }
+                });
+            });
+
+            // Handle update button clicks
+            $('#serviceDataTable tbody').on('click', '.update-service-button', function () {
+                var index = $(this).data('index');
+
+                // Fetch the specific service data
+                $.ajax({
+                    url: '/api/ServiceData',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var service = data[index];
+
+                        if (service) {
+                            // Populate the form fields with existing data
+                            $('#UpdateServiceIndex').val(index);
+                            $('#UpdateService').val(service.service);
+                            $('#UpdateAddress').val(service.address);
+                            $('#UpdateIPAddress').val(service.ipAddress);
+                            $('#UpdateIPGateway').val(service.ipGateway);
+                            $('#UpdateAccessLevel').val(service.accessLevel);
+
+                            // Show the update modal
+                            $('#updateServiceModal').modal('show');
+                        } else {
+                            alert('Service data not found.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Failed to load service data for update:', error);
+                        alert('Failed to load service data for update. Please check the console for more details.');
+                    }
+                });
+            });
+
+            // Handle delete button clicks
+            $('#serviceDataTable tbody').on('click', '.delete-service-button', function () {
+                var index = $(this).data('index');
+                var row = $(this).closest('tr');
+
+                if (confirm('Are you sure you want to delete this service?')) {
+                    $.ajax({
+                        url: '/api/ServiceData/' + index,
+                        type: 'DELETE',
+                        success: function () {
+                            // Remove the row from the table
+                            row.fadeOut(500, function () {
+                                $(this).remove();
+                            });
+                            alert('Service data deleted successfully.');
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error deleting service data:', error);
+                            alert('Failed to delete service data. Please check the console for more details.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

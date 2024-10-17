@@ -1,0 +1,21 @@
+# Configuration for API endpoint
+$apiEndpoint = "http://kctest.cronotech.us/api/ServiceData/generate"
+
+# Function to send POST request to generate service records
+function Generate-ServiceRecords {
+    try {
+        $response = Invoke-RestMethod -Uri $apiEndpoint -Method Post -ContentType "application/json"
+
+        if ($response.Message) {
+            Write-Host "Success: $($response.Message)"
+        } else {
+            Write-Host "Service records generated successfully."
+        }
+    }
+    catch {
+        Write-Error "Failed to generate service records: $_"
+    }
+}
+
+# Execute the function
+Generate-ServiceRecords

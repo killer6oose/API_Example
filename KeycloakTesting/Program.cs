@@ -1,13 +1,15 @@
-using KeycloakTesting.Data;
+// File: Program.cs
 using KeycloakTesting.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Serilog;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<JsonUserDataService>();
+builder.Services.AddSingleton<JsonServiceDataService>();
+
+// setup TempData provider
+builder.Services.AddSession();
+builder.Services.AddRazorPages().AddSessionStateTempDataProvider();
 
 // Register UserDataService with DbContext
 builder.Services.AddScoped<UserDataService>();
@@ -19,7 +21,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<MappingService>();
 builder.Services.AddControllers();
 
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -38,21 +43,18 @@ else
     app.UseHsts();
 }
 
-//not using an SSL cert, will uncomment if added
-//app.UseHttpsRedirection();
+// Not using an SSL certificate; uncomment if added
+// app.UseHttpsRedirection();
+
 app.UseStaticFiles();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseRouting();
+app.UseSession();
 
 app.MapRazorPages();
-
 // Map API endpoints
 app.MapControllers();
-
-//removed the below for testing
-//app.MapGet("/api/userdata", ([FromServices] JsonUserDataService userDataService) =>
-//{
-//    return Results.Ok(userDataService.GetAllUserData());
-//});
 
 app.Run();

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿// File: Controllers/UserDataController.cs
+using Microsoft.AspNetCore.Mvc;
 using KeycloakTesting.Services;
 using KeycloakTesting.Models;
 using System;
@@ -169,7 +170,7 @@ namespace KeycloakTesting.Controllers
                 }
                 else
                 {
-                    return Ok("No Access");
+                    return Ok("You do not have the correct level of Access. Please contact your manager for Access or Advice.");
                 }
             }
             catch (Exception ex)
