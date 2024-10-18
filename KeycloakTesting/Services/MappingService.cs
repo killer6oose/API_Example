@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using KeycloakTesting.Models;
+using ApiExperiment.Models;
 
-namespace KeycloakTesting.Services
+namespace ApiExperiment.Services
 {
     public class MappingService
     {

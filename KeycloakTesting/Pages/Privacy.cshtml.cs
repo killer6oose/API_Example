@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace KeycloakTesting.Pages
+namespace ApiExperiment.Pages
 {
     public class PrivacyModel : PageModel
     {

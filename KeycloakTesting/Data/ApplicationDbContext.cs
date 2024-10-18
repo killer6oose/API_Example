@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using KeycloakTesting.Models;
+using ApiExperiment.Models;
 
-namespace KeycloakTesting.Data
+namespace ApiExperiment.Data
 {
     public class ApplicationDbContext : DbContext
     {

@@ -1,4 +1,4 @@
-﻿namespace KeycloakTesting.Models
+﻿namespace ApiExperiment.Models
 {
     public class NumberColorMapping
     {

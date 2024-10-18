@@ -1,9 +1,9 @@
 ﻿// File: Controllers/ServiceDataController.cs
-using KeycloakTesting.Models;
-using KeycloakTesting.Services;
+using ApiExperiment.Models;
+using ApiExperiment.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KeycloakTesting.Controllers
+namespace ApiExperiment.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

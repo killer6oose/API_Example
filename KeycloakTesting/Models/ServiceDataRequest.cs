@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace KeycloakTesting.Models
+namespace ApiExperiment.Models
 {
     public class ServiceDataRequest
     {

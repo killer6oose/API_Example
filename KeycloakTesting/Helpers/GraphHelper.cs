@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users.Item.SendMail;
 
-namespace KeycloakTesting.Helpers
+namespace ApiExperiment.Helpers
 {
     public class GraphHelper
     {

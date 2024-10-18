@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using KeycloakTesting.Services;
-using KeycloakTesting.Models;
 using System;
 using System.Collections.Generic;
+using ApiExperiment.Services;
+using ApiExperiment.Models;
 
-namespace KeycloakTesting.Pages
+namespace ApiExperiment.Pages
 {
     public class UserDataModel : PageModel
     {

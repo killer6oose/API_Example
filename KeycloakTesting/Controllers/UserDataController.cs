@@ -1,11 +1,11 @@
 ﻿// File: Controllers/UserDataController.cs
 using Microsoft.AspNetCore.Mvc;
-using KeycloakTesting.Services;
-using KeycloakTesting.Models;
 using System;
 using System.Linq;
+using ApiExperiment.Services;
+using ApiExperiment.Models;
 
-namespace KeycloakTesting.Controllers
+namespace ApiExperiment.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using KeycloakTesting.Services;
+using ApiExperiment.Services;
 
-namespace KeycloakTesting.Controllers
+namespace ApiExperiment.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

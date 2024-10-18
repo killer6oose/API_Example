@@ -1,12 +1,12 @@
-﻿using KeycloakTesting.Models;
-using KeycloakTesting.Data;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using ApiExperiment.Data;
+using ApiExperiment.Models;
 
-namespace KeycloakTesting.Services
+namespace ApiExperiment.Services
 {
     public class UserDataService
     {
-       private readonly ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
         public UserData GetUserData()
         {

@@ -1,8 +1,8 @@
-﻿using KeycloakTesting.Models;
+﻿using ApiExperiment.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace KeycloakTesting.Services
+namespace ApiExperiment.Services
 {
     public class JsonServiceDataService
     {

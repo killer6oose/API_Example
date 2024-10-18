@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace KeycloakTesting.Pages
+namespace ApiExperiment.Pages
 {
     public class IndexModel : PageModel
     {

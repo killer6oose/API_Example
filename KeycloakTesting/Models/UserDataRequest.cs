@@ -1,7 +1,6 @@
 ﻿using System.Text.Json.Serialization;
-using KeycloakTesting.Models;
 
-namespace KeycloakTesting.Models
+namespace ApiExperiment.Models
 {
     public class UserDataRequest
     {

@@ -1,9 +1,9 @@
-using KeycloakTesting.Helpers;
+using ApiExperiment.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Serilog.Core;
 
-namespace KeycloakTesting.Pages
+namespace ApiExperiment.Pages
 {
     public class ContactModel(IConfiguration configuration, ILogger<ContactModel> logger) : PageModel
     {
@@ -81,7 +81,7 @@ namespace KeycloakTesting.Pages
                 MessageSent = true;
                 return RedirectToPage();
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 ErrorMessage = "An error occurred while sending your message. Please try again later.";
                 GenerateCaptcha();
@@ -93,7 +93,7 @@ namespace KeycloakTesting.Pages
 
         private void GenerateCaptcha()
         {
-            var random = new System.Random();
+            var random = new Random();
             CaptchaOperand1 = random.Next(1, 10);
             CaptchaOperand2 = random.Next(1, 10);
 
