@@ -179,11 +179,15 @@ namespace ApiExperiment.Controllers
 
             try
             {
-                // Retrieve service data based on access level
-                var serviceDataList = _serviceDataService.GetServiceDataByAccessLevel(request.RequesterAccessLevel);
+                // Retrieve service data accessible by the requester
+                var serviceDataList = _serviceDataService.GetAllServiceData()
+                    .Where(s => s.AccessLevel <= request.RequesterAccessLevel)
+                    .ToList();
 
-                // Retrieve user data based on access level
-                var userDataList = _userDataService.GetUserDataByAccessLevel(request.RequesterAccessLevel);
+                // Retrieve user data accessible by the requester
+                var userDataList = _userDataService.GetAllUserData()
+                    .Where(u => u.AccessLevel <= request.RequesterAccessLevel)
+                    .ToList();
 
                 // Combine both data sets
                 var combinedData = new

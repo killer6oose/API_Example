@@ -226,7 +226,7 @@ namespace ApiExperiment.Controllers
                 }
                 else
                 {
-                    return Ok("You do not have the correct level of Access. Please contact your manager for Access or Advice.");
+                    return Forbid("You do not have sufficient access level to view this data.");
                 }
             }
             catch (Exception ex)
@@ -235,6 +235,7 @@ namespace ApiExperiment.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
 
         /// <summary>
         /// Retrieves user data filtered by access level.
@@ -254,7 +255,11 @@ namespace ApiExperiment.Controllers
             try
             {
                 AccessLevel accessLevelEnum = Enum.Parse<AccessLevel>(accessLevel, true);
-                var data = _userDataService.GetUserDataByAccessLevel(accessLevelEnum);
+
+                var data = _userDataService.GetAllUserData()
+                    .Where(u => u.AccessLevel <= accessLevelEnum)
+                    .ToList();
+
                 return Ok(data);
             }
             catch (ArgumentException)
@@ -267,5 +272,6 @@ namespace ApiExperiment.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
     }
 }
