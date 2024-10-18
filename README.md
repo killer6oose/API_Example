@@ -57,10 +57,10 @@ These instructions will help you set up the project on your local machine for de
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/killer6oose/apiexample.git
+   git clone https://github.com/killer6oose/API_Example.git
 2. **Navigate to the Project Directory**
    ```bash
-    cd YourRepository
+    cd API_Example
 3. **Install Dependencies** - may not be required if VisualStudio takes care of it!
 
     a.  Restore NuGet packages by running:
@@ -115,6 +115,8 @@ The console should now show you what port to browse.
     Rename the file from .txt to .ps1 to execute the script.
 
 ## API Endpoints
+Feel free to view the swagger page for detailed API endpoints: [https://api.cronotech.us/swagger](https://api.cronotech.us/swagger)
+
 ### User Data API
   - Get All User Data
     ```http
