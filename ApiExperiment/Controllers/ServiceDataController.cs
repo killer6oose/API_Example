@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ApiExperiment.Controllers
 {
@@ -161,10 +162,10 @@ namespace ApiExperiment.Controllers
         }
 
         /// <summary>
-        /// Retrieves combined user and service data based on the requester's access level.
+        /// Retrieves combined user and service data accessible by the requester's access level using hierarchical access control.
         /// </summary>
         /// <param name="request">The request containing the requester access level and user email.</param>
-        /// <returns>The combined user and service data accessible by the specified access level.</returns>
+        /// <returns>The combined data accessible by the specified access level.</returns>
         /// <response code="200">Returns the combined data.</response>
         /// <response code="400">Invalid request data.</response>
         /// <response code="500">Internal server error.</response>
@@ -200,7 +201,7 @@ namespace ApiExperiment.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get combined user and service data by access level.");
+                _logger.LogError(ex, "Failed to get combined user and service data by access level. You do not have access to view this record");
                 return StatusCode(500, "Internal server error");
             }
         }
@@ -239,17 +240,18 @@ namespace ApiExperiment.Controllers
     }
 
     /// <summary>
-    /// Represents a request to retrieve service data with access control.
+    /// Represents a request to retrieve service data with hierarchical access control.
     /// </summary>
     public class ServiceDataRequest
     {
         /// <summary>
         /// The access level of the requester.
+        /// Higher access levels can access data with the same or lower access levels.
         /// </summary>
         public AccessLevel RequesterAccessLevel { get; set; }
 
         /// <summary>
-        /// The email address of the user.
+        /// The email address of the user making the request.
         /// </summary>
         public string UserEmail { get; set; }
 

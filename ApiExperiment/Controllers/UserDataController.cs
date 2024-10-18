@@ -192,12 +192,13 @@ namespace ApiExperiment.Controllers
         }
 
         /// <summary>
-        /// Retrieves user data by email with access control.
+        /// Retrieves user data by email with hierarchical access control.
         /// </summary>
         /// <param name="request">The request containing the user email and requester access level.</param>
-        /// <returns>The user data if access is permitted; otherwise, an access denied message.</returns>
-        /// <response code="200">Returns the user data or an access denied message.</response>
+        /// <returns>The user data if access is permitted; otherwise, a forbidden response.</returns>
+        /// <response code="200">Returns the user data.</response>
         /// <response code="400">Invalid request data.</response>
+        /// <response code="403">Access is forbidden due to insufficient access level.</response>
         /// <response code="404">User not found.</response>
         /// <response code="500">Internal server error.</response>
         // POST: api/UserData/request
@@ -236,12 +237,11 @@ namespace ApiExperiment.Controllers
             }
         }
 
-
         /// <summary>
-        /// Retrieves user data filtered by access level.
+        /// Retrieves user data filtered by access level with hierarchical access control.
         /// </summary>
-        /// <param name="accessLevel">The access level to filter by (Admin, User, Guest).</param>
-        /// <returns>A list of user data accessible by the specified access level. If you do not have the listed access level or higher, you will get a code 400.</returns>
+        /// <param name="accessLevel">The access level of the requester (Public, Confidential, Secret, TopSecret).</param>
+        /// <returns>A list of user data accessible by the specified access level, or higher.</returns>
         /// <response code="200">Returns the filtered user data.</response>
         /// <response code="400">Invalid access level provided.</response>
         /// <response code="500">Internal server error.</response>
@@ -264,7 +264,7 @@ namespace ApiExperiment.Controllers
             }
             catch (ArgumentException)
             {
-                return BadRequest("Invalid access level.");
+                return BadRequest("Invalid access level. You do not have access to view this record.");
             }
             catch (Exception ex)
             {
@@ -272,6 +272,5 @@ namespace ApiExperiment.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
-
     }
 }

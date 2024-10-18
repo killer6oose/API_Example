@@ -2,6 +2,7 @@
 {
     /// <summary>
     /// Defines the various access levels for data security.
+    /// Higher numerical values represent higher security clearance.
     /// </summary>
     public enum AccessLevel
     {
