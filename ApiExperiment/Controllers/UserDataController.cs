@@ -2,11 +2,16 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using ApiExperiment.Services;
 using ApiExperiment.Models;
+using Microsoft.Extensions.Logging;
 
 namespace ApiExperiment.Controllers
 {
+    /// <summary>
+    /// Controller for handling user data operations.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class UserDataController : ControllerBase
@@ -14,12 +19,23 @@ namespace ApiExperiment.Controllers
         private readonly JsonUserDataService _userDataService;
         private readonly ILogger<UserDataController> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserDataController"/> class.
+        /// </summary>
+        /// <param name="userDataService">The user data service.</param>
+        /// <param name="logger">The logger instance.</param>
         public UserDataController(JsonUserDataService userDataService, ILogger<UserDataController> logger)
         {
             _userDataService = userDataService;
             _logger = logger;
         }
 
+        /// <summary>
+        /// Retrieves all user data.
+        /// </summary>
+        /// <returns>A list of all user data.</returns>
+        /// <response code="200">Returns the list of user data.</response>
+        /// <response code="500">Internal server error.</response>
         // GET: api/UserData
         [HttpGet]
         public IActionResult GetAllUserData()
@@ -36,6 +52,14 @@ namespace ApiExperiment.Controllers
             }
         }
 
+        /// <summary>
+        /// Adds new user data.
+        /// </summary>
+        /// <param name="newData">The new user data to add.</param>
+        /// <returns>The created user data.</returns>
+        /// <response code="201">User data created successfully.</response>
+        /// <response code="400">Invalid user data provided.</response>
+        /// <response code="500">Internal server error.</response>
         // POST: api/UserData
         [HttpPost]
         public IActionResult AddUserData([FromBody] UserData newData)
@@ -62,6 +86,16 @@ namespace ApiExperiment.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates existing user data at the specified index.
+        /// </summary>
+        /// <param name="index">The index of the user data to update.</param>
+        /// <param name="updatedData">The updated user data.</param>
+        /// <returns>The updated user data.</returns>
+        /// <response code="200">User data updated successfully.</response>
+        /// <response code="400">Invalid user data provided.</response>
+        /// <response code="404">User data not found.</response>
+        /// <response code="500">Internal server error.</response>
         // PUT: api/UserData/{index}
         [HttpPut("{index}")]
         public IActionResult UpdateUserData(int index, [FromBody] UserData updatedData)
@@ -95,6 +129,13 @@ namespace ApiExperiment.Controllers
             }
         }
 
+        /// <summary>
+        /// Deletes user data at the specified index.
+        /// </summary>
+        /// <param name="index">The index of the user data to delete.</param>
+        /// <response code="204">User data deleted successfully.</response>
+        /// <response code="404">User data not found.</response>
+        /// <response code="500">Internal server error.</response>
         // DELETE: api/UserData/{index}
         [HttpDelete("{index}")]
         public IActionResult DeleteUserData(int index)
@@ -118,6 +159,12 @@ namespace ApiExperiment.Controllers
             }
         }
 
+        /// <summary>
+        /// Generates 50 new random user records.
+        /// </summary>
+        /// <returns>A message indicating the operation was successful.</returns>
+        /// <response code="200">Records generated successfully.</response>
+        /// <response code="500">Internal server error.</response>
         // POST: api/UserData/generate
         [HttpPost("generate")]
         public IActionResult GenerateRecords()
@@ -144,6 +191,15 @@ namespace ApiExperiment.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves user data by email with access control.
+        /// </summary>
+        /// <param name="request">The request containing the user email and requester access level.</param>
+        /// <returns>The user data if access is permitted; otherwise, an access denied message.</returns>
+        /// <response code="200">Returns the user data or an access denied message.</response>
+        /// <response code="400">Invalid request data.</response>
+        /// <response code="404">User not found.</response>
+        /// <response code="500">Internal server error.</response>
         // POST: api/UserData/request
         [HttpPost("request")]
         public IActionResult GetUserDataByEmail([FromBody] UserDataRequest request)
@@ -180,6 +236,14 @@ namespace ApiExperiment.Controllers
             }
         }
 
+        /// <summary>
+        /// Retrieves user data filtered by access level.
+        /// </summary>
+        /// <param name="accessLevel">The access level to filter by (Admin, User, Guest).</param>
+        /// <returns>A list of user data accessible by the specified access level. If you do not have the listed access level or higher, you will get a code 400.</returns>
+        /// <response code="200">Returns the filtered user data.</response>
+        /// <response code="400">Invalid access level provided.</response>
+        /// <response code="500">Internal server error.</response>
         // GET: api/UserData/accesslevel/{accessLevel}
         [HttpGet("accesslevel/{accessLevel}")]
         public IActionResult GetUserDataByAccessLevel(string accessLevel)
