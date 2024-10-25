@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swagger UI</title>
+    <link rel="stylesheet" href="swagger-ui.css" />
+    <link rel="stylesheet" href="custom-swagger.css" />
+
+</head>
+<body>
+    <!-- Custom Button to Navigate to HomePage -->
+    <div style="padding: 10px;">
+        <button onclick="window.location.href='/'" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+            Back to Homepage
+        </button>
+    </div>
+
+    <!-- Swagger UI Content -->
+    <div id="swagger-ui"></div>
+
+    <script src="swagger-ui-bundle.js"></script>
+    <script src="swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            const ui = SwaggerUIBundle({
+                url: "/swagger/v1/swagger.json", // Ensure this matches your Swagger JSON location
+                dom_id: '#swagger-ui',
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                layout: "StandaloneLayout"
+            });
+
+            window.ui = ui;
+        };
+    </script>
+</body>
+</html>

@@ -8,8 +8,8 @@
     <h1 id="user-service-data-api-application">User &amp; Service Data API Application</h1>
     <p>An ASP.NET Core web application that provides user and service data through APIs with different access levels. This project demonstrates how to build a web application with a frontend, backend APIs, and data interactions. It includes functionality for downloading PowerShell scripts and a contact form that sends emails using Microsoft Graph.</p>
     <h2 id="live-demo">Live Demo</h2>
-    <p>The application is available for public use at <a href="https://api.cronotech.us">https://api.cronotech.us</a>.</p>
-    <p>Swagger is running on this endpoint - if you would like to review what endpoints are available you may access the public Swagger page at <a href="https://api.cronotech.us/swagger">https://api.cronotech.us/swagger</a></p>
+    <p>The application is available for public use at <a href="@Model.PublicUrl">@Model.PublicUrl</a>.</p>
+    <p>Swagger is running on this endpoint - if you would like to review what endpoints are available you may access the public Swagger page at <a href="@Model.PublicUrl/swagger">@Model.PublicUrl/swagger</a></p>
     <h2 id="table-of-contents">Table of Contents</h2>
     <ul>
         <li><a href="#features">Features</a></li>
@@ -88,31 +88,50 @@
             </code></pre>
         </li>
     </ol>
-    <h2 id="configuration">Configuration</h2>
-    <h5 id="app-settings-for-the-contact-page-if-you-wish-to-use-it-yourself-">App Settings (For the Contact page, if you wish to use it yourself)</h5>
-    <p>Create an appsettings.json file in the root of the project if it doesn&#39;t exist, and add the following configuration:</p>
-        <pre><code class="language-json">
-        {
-          "AzureAd": {
-            "ClientId": "your-client-id",
-            "TenantId": "your-tenant-id",
-            "ClientSecret": "your-client-secret",
-            "SenderEmail": "your-email@example.com"
-          }
-        }
-        </code></pre>
 
-    <ul>
-        <li>ClientId, TenantId, ClientSecret: Required for Microsoft Graph API integration. You can obtain these by registering an application in Azure Active Directory.</li>
+    <div class="container mt-4">
+        <h1 id="user-service-data-api-application">User &amp; Service Data API Application</h1>
+        <p>An ASP.NET Core web application that provides user and service data through APIs with different access levels.</p>
+
+        <h2 id="configuration">Configuration</h2>
+        <h5 id="app-settings-for-the-contact-page-if-you-wish-to-use-it-yourself-">App Settings (For the Contact page)</h5>
+        <p>
+            This project uses <strong>ASP.NET Core User Secrets</strong> for storing sensitive information, such as the Azure AD credentials for the contact form.
+            To set up your user secrets, run the following commands in the NuGet Console:
+        </p>
+        <pre><code class="language-bash">
+    dotnet user-secrets init
+    dotnet user-secrets set "AzureAd:ClientId" "your-client-id"
+    dotnet user-secrets set "AzureAd:TenantId" "your-tenant-id"
+    dotnet user-secrets set "AzureAd:ClientSecret" "your-client-secret"
+    dotnet user-secrets set "AzureAd:SenderEmail" "support@yourDoamin.tld"
+    </code></pre>
+
+        <p>The project is configured to look for these secrets in the User Secrets store rather than in the <code>appsettings.json</code>.</p>
+        <ul>
+            <li>ClientId, TenantId, ClientSecret: Required for Microsoft Graph API integration. You can obtain these by registering an application in Azure Active Directory (Azure Entra).</li>
         <li>
             <p>
                 SenderEmail: The email address used to send emails via Microsoft Graph.
-                If you are not using Microsoft Graph, you can remove or ignore this configuration and related code.
+                If you are not using Microsoft Graph, you can remove or ignore this configuration and related code. <strong>If no ClientID is set, the application is designed to </strong>
             </p>
+        </ul>
+    </div>
+    <h5 id="app-settings-for-dynamic-URLs-on-home-page-if-you-wish-to-use-it-yourself-">App Settings (For the Home page URLs, if you wish to use it yourself)</h5>
+    <p>Create an appsettings.json file in the root of the project if it doesn&#39;t exist, and add the following configuration:</p>
+        <pre><code class="language-json">
+        {
+          "Settings": {
+            "PublicUrl": "https://localhost:7189",
+            "SupportEmail": "youremail@yourDomain.tld"
+          }
+        }
+        </code></pre>
+    <div class="container mt-4">     
             <h3 id="running-the-application">Running the Application</h3>
             <p>You can run the application using the .NET CLI or Visual Studio.</p>
             <h2 id="using-net-cli">Using .NET CLI</h2>
-        <pre><code class="language-bash">
+            <pre><code class="language-bash">
             dotnet run
         </code></pre>
             <h3 id="using-visual-studio">Using Visual Studio</h3>
@@ -122,7 +141,6 @@
                 Press F5 to run the application in debug mode or Ctrl+F5 to run without debugging.
             </p>
         </li>
-    </ul>
     <p>The console should now show you what port to browse.</p>
     <h2 id="usage">Usage</h2>
     <h3 id="accessing-the-frontend">Accessing the Frontend</h3>

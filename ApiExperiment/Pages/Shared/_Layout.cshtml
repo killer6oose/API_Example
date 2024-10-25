@@ -1,4 +1,5 @@
-﻿@* File: Pages/Shared/_Layout.cshtml *@
+﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@* File: Pages/Shared/_Layout.cshtml *@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,6 +102,11 @@
             // For other pages, do not show the download button
             showDownloadButton = false;
         }
+
+        // Get the AzureAd ClientId from the configuration
+        string azureClientId = Configuration["AzureAd:ClientId"];
+        bool hasAzureClientId = !string.IsNullOrEmpty(azureClientId);
+        var supportEmail = Configuration["Settings:SupportEmail"];
     }
 
     <!-- Navbar -->
@@ -132,7 +138,16 @@
 
                     <!-- Contact Navigation Item -->
                     <li class="nav-item @(currentPage == "/Contact" ? "active" : "")">
-                        <a class="nav-link" href="/Contact">Contact Us</a>
+                        @if (hasAzureClientId)
+                        {
+                            <!-- If ClientId exists, go to Contact page -->
+                            <a class="nav-link" href="/Contact">Contact Us</a>
+                        }
+                        else
+                        {
+                            <!-- If no ClientId, show mailto link -->
+                            <a class="nav-link" href="mailto:@supportEmail">Contact Us</a>
+                        }
                     </li>
                 </ul>
                 <!-- Align the buttons to the right -->
@@ -143,7 +158,7 @@
                     </li>
                     <li class="nav-item me-2">
                         <!-- Source Code Button -->
-                        <a class="btn btn-secondary" href="https://api.cronotech.us/swagger">API Docs</a>
+                        <a class="btn btn-secondary" href="~/swagger/">API Docs</a>
                     </li>
                     <!-- Conditionally Render Download Script Button -->
                     @if (showDownloadButton)
@@ -177,9 +192,10 @@
     <!-- Footer -->
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
-            <span class="text-muted">© 2024 - User & Service Data API Application by CronoTech Consulting LLC</span>
+            <span class="text-muted">© 2024 - Example API Application by <a href="https://cronotech.us" target="_blank" style="text-decoration: none; color: inherit;">CronoTech Consulting LLC</a></span>
         </div>
     </footer>
+
 
     <!-- Download Modal -->
     <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">

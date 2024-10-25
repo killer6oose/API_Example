@@ -1,0 +1,9 @@
+﻿/* Custom styling for Swagger UI */
+body {
+    background-color: #f0f0f0; /* Light background color */
+}
+
+button {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}

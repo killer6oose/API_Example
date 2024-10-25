@@ -77,6 +77,7 @@ app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Experiment v1");
     c.DocumentTitle = "API Experiment API Documentation";
+    c.IndexStream = () => File.OpenRead("wwwroot/swagger/index.html");
 });
 
 app.UseRouting();
