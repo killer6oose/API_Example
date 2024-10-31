@@ -1,0 +1,35 @@
+# File: GenerateDefaultFieldAccess.ps1
+# This script generates default field access settings for both UserData and ServiceData.
+
+# Define the API URL and endpoint
+$apiUrl = "https://api.cronotech.us/api/FieldAccess" # Replace with your URl if different
+
+# Define the default field access settings
+$defaultAccessSettings = @(
+    # UserData settings
+    @{ Endpoint = "UserData"; FieldName = "PhoneNum"; AccessLevel = "Public" },
+    @{ Endpoint = "UserData"; FieldName = "UserEmail"; AccessLevel = "Confidential" },
+    @{ Endpoint = "UserData"; FieldName = "FullName"; AccessLevel = "Secret" },
+    @{ Endpoint = "UserData"; FieldName = "Address"; AccessLevel = "TopSecret" },
+    # ServiceData settings
+    @{ Endpoint = "ServiceData"; FieldName = "Service"; AccessLevel = "Public" },
+    @{ Endpoint = "ServiceData"; FieldName = "Address"; AccessLevel = "Confidential" },
+    @{ Endpoint = "ServiceData"; FieldName = "IPAddress"; AccessLevel = "Secret" },
+    @{ Endpoint = "ServiceData"; FieldName = "IPGateway"; AccessLevel = "TopSecret" }
+)
+
+# Loop through each default setting and send a POST request to the API
+foreach ($setting in $defaultAccessSettings) {
+    # Convert the setting to JSON format
+    $jsonBody = $setting | ConvertTo-Json
+    
+    # Send the POST request
+    $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body $jsonBody -ContentType "application/json"
+    
+    # Check if the request was successful
+    if ($response.StatusCode -eq 201 -or $response.StatusCode -eq 200) {
+        Write-Output "Added field access setting for $($setting.Endpoint) - $($setting.FieldName) with access level $($setting.AccessLevel)"
+    } else {
+        Write-Output "Failed to add setting for $($setting.Endpoint) - $($setting.FieldName): $($response | ConvertTo-Json)"
+    }
+}

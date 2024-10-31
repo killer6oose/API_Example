@@ -6,6 +6,14 @@
     <title>@ViewData["Title"] - API Data Experiment</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <!-- injecting GraphHelper and MailHelper for the /contact page -->
+    @inject ApiExperiment.Helpers.GraphHelper GraphHelper
+    @inject ApiExperiment.Helpers.MailHelper MailHelper
+    @{
+        // Set mailto link dynamically
+        var mailtoLink = MailHelper.GetMailtoLink();
+    }
+
     <!-- Bootstrap CSS (Using Darkly Theme from Bootswatch) -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/darkly/bootstrap.min.css" />
 
@@ -96,6 +104,13 @@
             modalBodyText = "You are about to download the UserData PowerShell script. Please change the file type from <code>.txt</code> to <code>.ps1</code> after downloading to execute the script.";
             showDownloadButton = true;
         }
+        else if (currentPage.Contains("/FieldAccess") || currentPage == "/")
+        {
+            downloadButtonText = "Download FieldAccess Script";
+            modalTitle = "Download Field Access Script";
+            modalBodyText = "You are about to download the Field Access PowerShell script. Please change the file type from <code>.txt</code> to <code>.ps1</code> after downloading to execute the script.";
+            showDownloadButton = true;
+        }
         else
         {
             // For other pages, do not show the download button
@@ -130,9 +145,21 @@
                         <a class="nav-link" href="/ServiceData">Service Data</a>
                     </li>
 
+                    <!-- Field Access Navigation Item -->
+                    <li class="nav-item @(currentPage == "/FieldAccess" ? "active" : "")">
+                        <a class="nav-link" href="/FieldAccess">Field Access</a>
+                    </li>
+
                     <!-- Contact Navigation Item -->
                     <li class="nav-item @(currentPage == "/Contact" ? "active" : "")">
-                        <a class="nav-link" href="/Contact">Contact Us</a>
+                        @if (GraphHelper.IsGraphClientConfigured)
+                        {
+                            <a class="nav-link" href="/Contact">Contact Us</a>
+                        }
+                        else
+                        {
+                            <a class="nav-link" href="@MailHelper.GetMailtoLink()">Contact Us</a>
+                        }
                     </li>
                 </ul>
                 <!-- Align the buttons to the right -->
@@ -186,13 +213,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <!-- Modal Title -->
-                    <h5 class="modal-title" id="downloadModalLabel">@modalTitle</h5>
+                    <h5 class="modal-title" id="downloadModalLabel">@downloadButtonText</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Modal Body -->
-                    <p>@Html.Raw(modalBodyText)</p>
+                    <p>Please change the file type from <code>.txt</code> to <code>.ps1</code> after downloading to execute the script.</p>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" value="" id="acknowledgeCheckbox">
                         <label class="form-check-label" for="acknowledgeCheckbox">
@@ -201,12 +226,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <!-- Modal Footer Buttons -->
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <!-- Disabled until checkbox is checked -->
-                    <a href="#" id="downloadScriptButton" class="btn btn-info disabled" download>
-                        Download
-                    </a>
+                    <a href="#" id="downloadScriptButton" class="btn btn-info disabled" download>Download</a>
                 </div>
             </div>
         </div>
@@ -258,25 +279,28 @@
                 var downloadLink = '';
                 var fileName = '';
 
-                if (currentPage.includes('/ServiceData')) {
+                if (currentPage.includes('/FieldAccess')) {
+                    downloadLink = '/scripts/GenerateDefaultFieldAccess.ps1.txt';
+                    fileName = 'GenerateDefaultFieldAccess.ps1';
+                } else if (currentPage.includes('/ServiceData')) {
                     downloadLink = '/scripts/CreateRandomServiceData.ps1.txt';
                     fileName = 'CreateRandomServiceData.ps1';
                 } else if (currentPage.includes('/UserData')) {
                     downloadLink = '/scripts/CreateRandomUserData.ps1.txt';
                     fileName = 'CreateRandomUserData.ps1';
-                } else {
+                                } else {
                     // Default case or handle other pages
                 }
 
-                $('#downloadScriptButton').attr('href', downloadLink);
+                        $('#downloadScriptButton').attr('href', downloadLink);
                 // Set the download attribute to rename the file upon download
                 $('#downloadScriptButton').attr('download', fileName);
 
                 // Reset the checkbox and disable the button
                 $('#acknowledgeCheckbox').prop('checked', false);
-                $('#downloadScriptButton').addClass('disabled');
-            });
-        });
+                    $('#downloadScriptButton').addClass('disabled');
+                    });
+                });
     </script>
 
 </body>

@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<JsonUserDataService>();
 builder.Services.AddSingleton<JsonServiceDataService>();
+builder.Services.AddSingleton<ApiExperiment.Helpers.GraphHelper>();
+builder.Services.AddSingleton<ApiExperiment.Helpers.MailHelper>();
 
 // setup TempData provider
 builder.Services.AddSession();
@@ -20,7 +22,6 @@ builder.Services.AddScoped<UserDataService>();
 builder.Services.AddRazorPages();
 
 // Register MappingService
-builder.Services.AddSingleton<MappingService>();
 builder.Services.AddControllers();
 
 // Swagger

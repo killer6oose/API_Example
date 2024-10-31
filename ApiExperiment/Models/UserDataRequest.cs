@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ApiExperiment.Models
 {
@@ -17,6 +18,7 @@ namespace ApiExperiment.Models
         /// <summary>
         /// The email address of the user whose data is requested.
         /// </summary>
-        public string UserEmail { get; set; }
+        [EmailAddress] //valid email format
+        public required string UserEmail { get; set; } = string.Empty;
     }
 }

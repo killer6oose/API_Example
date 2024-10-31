@@ -1,195 +1,157 @@
 ﻿@page
-@model             IndexModel
+@model IndexModel
 @{
     ViewData["Title"] = "Home";
 }
 
 <div class="container mt-4">
-    <h1 id="user-service-data-api-application">User &amp; Service Data API Application</h1>
-    <p>An ASP.NET Core web application that provides user and service data through APIs with different access levels. This project demonstrates how to build a web application with a frontend, backend APIs, and data interactions. It includes functionality for downloading PowerShell scripts and a contact form that sends emails using Microsoft Graph.</p>
-    <h2 id="live-demo">Live Demo</h2>
-    <p>The application is available for public use at <a href="@Model.PublicUrl">@Model.PublicUrl</a>.</p>
-    <p>Swagger is running on this endpoint - if you would like to review what endpoints are available you may access the public Swagger page at <a href="@Model.PublicUrl/swagger">@Model.PublicUrl/swagger</a></p>
-    <h2 id="table-of-contents">Table of Contents</h2>
+    <h1>User &amp; Service Data API Application</h1>
+    <p>An ASP.NET Core web application providing APIs for managing user data, service data, and field access settings with hierarchical access control. This project demonstrates secure data handling, a frontend interface, and downloadable PowerShell scripts for data management.</p>
+
+    <h2>Live Demo</h2>
+    <p>The application is accessible at <a href="@Model.PublicUrl">@Model.PublicUrl</a>.</p>
+    <p>View the Swagger documentation at <a href="@Model.PublicUrl/swagger">@Model.PublicUrl/swagger</a> for a full list of available endpoints and details.</p>
+
+    <h2>Table of Contents</h2>
     <ul>
         <li><a href="#features">Features</a></li>
-        <li><a href="#technologies-used">Technologies Used</a></li>
-        <li>
-            <a href="#getting-started">Getting Started</a>
-            <ul>
-                <li><a href="#prerequisites">Prerequisites</a></li>
-                <li><a href="#installation">Installation</a></li>
-                <li><a href="#configuration">Configuration</a></li>
-                <li><a href="#running-the-application">Running the Application</a></li>
-            </ul>
-        </li>
-        <li>
-            <a href="#usage">Usage</a>
-            <ul>
-                <li><a href="#accessing-the-frontend">Accessing the Frontend</a></li>
-                <li><a href="#downloading-powershell-scripts">Downloading PowerShell Scripts</a></li>
-            </ul>
-        </li>
-        <li>
-            <a href="#api-endpoints">API Endpoints</a>
-            <ul>
-                <li><a href="#user-data-api">User Data API</a></li>
-                <li><a href="#service-data-api">Service Data API</a></li>
-            </ul>
-        </li>
+        <li><a href="#api-overview">API Overview</a></li>
+        <li><a href="#getting-started">Getting Started</a></li>
+        <li><a href="#configuration">Configuration</a></li>
     </ul>
+
     <h2 id="features">Features</h2>
     <ul>
-        <li><strong>User Data API</strong>: Provides user data accessible via API endpoints.</li>
-        <li><strong>Service Data API</strong>: Provides service data with access level restrictions.</li>
-        <li><strong>Frontend Interface</strong>: Razor Pages frontend to interact with the data.</li>
-        <li><strong>Downloadable Scripts</strong>: Allows users to download PowerShell scripts for data generation.</li>
-        <li><strong>Contact Form</strong>: Users can send messages via a contact form, which sends emails using Microsoft Graph.</li>
-        <li><strong>Data Filtering and Searching</strong>: Integrated with DataTables for enhanced data interaction.</li>
+        <li><strong>User Data API</strong>: Securely provides user data with access level restrictions based on requester’s clearance.</li>
+        <li><strong>Service Data API</strong>: Manages service-related information with role-based access levels for enhanced security.</li>
+        <li><strong>Field Access Management</strong>: Configure access levels for specific fields, customizing data exposure based on access requirements.</li>
+        <li><strong>Frontend Interface</strong>: A simple, interactive frontend built with Razor Pages to interact with data.</li>
+        <li><strong>PowerShell Script Downloads</strong>: Download scripts to generate or reset data directly from the frontend.</li>
     </ul>
-    <h2 id="technologies-used">Technologies Used</h2>
+
+    <h2 id="api-overview">API Overview</h2>
+
+    <h3>User Data API</h3>
+    <p>The User Data API provides access to personal user data with field-specific access levels. Only users with appropriate access levels can view certain data fields.</p>
     <ul>
-        <li><strong>ASP.NET Core</strong> (.NET 6 or later)</li>
-        <li><strong>C#</strong></li>
-        <li><strong>Razor Pages</strong></li>
-        <li><strong>Microsoft Graph SDK</strong></li>
-        <li><strong>Bootstrap 5</strong> (Darkly Theme from Bootswatch)</li>
-        <li><strong>jQuery</strong></li>
-        <li><strong>DataTables</strong></li>
+        <li>
+            Retrieve All User Data
+            <pre><code class="language-http">
+GET /api/UserData
+            </code></pre>
+        </li>
+        <li>
+            Retrieve User Data by Access Level
+            <pre><code class="language-http">
+POST /api/UserData/request
+            </code></pre>
+            <strong>Request Body:</strong>
+            <pre><code class="language-json">
+{
+    "userEmail": "user@example.com",
+    "requesterAccessLevel": "Confidential"
+}
+            </code></pre>
+        </li>
     </ul>
+
+    <h3>Service Data API</h3>
+    <p>The Service Data API manages and provides access to service-related information, secured with role-based access controls for each field.</p>
+    <ul>
+        <li>
+            Retrieve All Service Data
+            <pre><code class="language-http">
+GET /api/ServiceData
+            </code></pre>
+        </li>
+        <li>
+            Retrieve Service Data by Access Level
+            <pre><code class="language-http">
+POST /api/ServiceData/request
+            </code></pre>
+            <strong>Request Body:</strong>
+            <pre><code class="language-json">
+{
+    "requesterAccessLevel": "Secret"
+}
+            </code></pre>
+        </li>
+    </ul>
+
+    <h3>Field Access API</h3>
+    <p>The Field Access API allows administrators to manage access levels for individual data fields in both UserData and ServiceData, ensuring secure, role-based data exposure.</p>
+    <ul>
+        <li>
+            Retrieve All Field Access Settings
+            <pre><code class="language-http">
+GET /api/FieldAccess
+            </code></pre>
+        </li>
+        <li>
+            Add New Field Access Setting
+            <pre><code class="language-http">
+POST /api/FieldAccess
+            </code></pre>
+            <strong>Request Body:</strong>
+            <pre><code class="language-json">
+{
+    "endpoint": "UserData",
+    "fieldName": "PhoneNum",
+    "accessLevel": "Public"
+}
+            </code></pre>
+        </li>
+    </ul>
+
     <h2 id="getting-started">Getting Started</h2>
-    <p>These instructions will help you set up the project on your local machine for development and testing purposes.</p>
-    <h3 id="prerequisites">Prerequisites</h3>
+    <h3>Prerequisites</h3>
     <ul>
         <li><strong>.NET SDK</strong>: Install the <a href="https://dotnet.microsoft.com/download/dotnet/6.0">.NET 6 SDK</a> or later.</li>
-        <li><strong>Visual Studio 2022</strong> or <strong>Visual Studio Code</strong>: For development.</li>
-        <li><strong>Azure Account</strong>: Required if you plan to use Microsoft Graph for sending emails.</li>
+        <li><strong>Visual Studio 2022</strong> or <strong>Visual Studio Code</strong>: Recommended for development.</li>
         <li><strong>Git</strong>: For cloning the repository.</li>
     </ul>
-    <h3 id="installation">Installation</h3>
+
+    <h3>Installation</h3>
     <ol>
         <li>
-            <p><strong>Clone the Repository</strong></p>
+            <strong>Clone the Repository</strong>
             <pre><code class="language-bash">
-            git clone https://github.com/killer6oose/API_Example.git
+git clone https://github.com/killer6oose/API_Example.git
             </code></pre>
         </li>
         <li>
             <strong>Navigate to the Project Directory</strong>
             <pre><code class="language-bash">
-            cd YourRepository
+cd API_Example
             </code></pre>
         </li>
         <li>
-            <p><strong>Install Dependencies</strong> - may not be required if VisualStudio takes care of it!</p>
-            <p> a.  Restore NuGet packages by running:</p>
+            <strong>Restore Dependencies</strong> (if required by your IDE)
             <pre><code class="language-bash">
-            dotnet restore
+dotnet restore
             </code></pre>
         </li>
     </ol>
 
-    <div class="container mt-4">
-        <h1 id="user-service-data-api-application">User &amp; Service Data API Application</h1>
-        <p>An ASP.NET Core web application that provides user and service data through APIs with different access levels.</p>
-
-        <h2 id="configuration">Configuration</h2>
-        <h5 id="app-settings-for-the-contact-page-if-you-wish-to-use-it-yourself-">App Settings (For the Contact page)</h5>
-        <p>
-            This project uses <strong>ASP.NET Core User Secrets</strong> for storing sensitive information, such as the Azure AD credentials for the contact form.
-            To set up your user secrets, run the following commands in the NuGet Console:
-        </p>
-        <pre><code class="language-bash">
-    dotnet user-secrets init
-    dotnet user-secrets set "AzureAd:ClientId" "your-client-id"
-    dotnet user-secrets set "AzureAd:TenantId" "your-tenant-id"
-    dotnet user-secrets set "AzureAd:ClientSecret" "your-client-secret"
-    dotnet user-secrets set "AzureAd:SenderEmail" "support@yourDoamin.tld"
+    <h2 id="configuration">Configuration</h2>
+    <h3>App Settings for Contact Page</h3>
+    <p>To enable the contact page, configure Azure AD credentials for Microsoft Graph in your app’s secrets:</p>
+    <pre><code class="language-bash">
+dotnet user-secrets init
+dotnet user-secrets set "AzureAd:ClientId" "your-client-id"
+dotnet user-secrets set "AzureAd:TenantId" "your-tenant-id"
+dotnet user-secrets set "AzureAd:ClientSecret" "your-client-secret"
+dotnet user-secrets set "AzureAd:SenderEmail" "support@yourDomain.tld"
     </code></pre>
 
-        <p>The project is configured to look for these secrets in the User Secrets store rather than in the <code>appsettings.json</code>.</p>
-        <ul>
-            <li>ClientId, TenantId, ClientSecret: Required for Microsoft Graph API integration. You can obtain these by registering an application in Azure Active Directory (Azure Entra).</li>
-        <li>
-            <p>
-                SenderEmail: The email address used to send emails via Microsoft Graph.
-                If you are not using Microsoft Graph, you can remove or ignore this configuration and related code. <strong>If no ClientID is set, the application is designed to </strong>
-            </p>
-        </ul>
-    </div>
-    <h5 id="app-settings-for-dynamic-URLs-on-home-page-if-you-wish-to-use-it-yourself-">App Settings (For the Home page URLs, if you wish to use it yourself)</h5>
-    <p>Create an appsettings.json file in the root of the project if it doesn&#39;t exist, and add the following configuration:</p>
-        <pre><code class="language-json">
-        {
-          "Settings": {
-            "PublicUrl": "https://localhost:7189",
-            "SupportEmail": "youremail@yourDomain.tld"
-          }
-        }
-        </code></pre>
-    <div class="container mt-4">     
-            <h3 id="running-the-application">Running the Application</h3>
-            <p>You can run the application using the .NET CLI or Visual Studio.</p>
-            <h2 id="using-net-cli">Using .NET CLI</h2>
-            <pre><code class="language-bash">
-            dotnet run
-        </code></pre>
-            <h3 id="using-visual-studio">Using Visual Studio</h3>
-            <p>
-                Open the solution file (<code>.sln</code>) in Visual Studio.
-                Set the startup project if not already set.
-                Press F5 to run the application in debug mode or Ctrl+F5 to run without debugging.
-            </p>
-        </li>
-    <p>The console should now show you what port to browse.</p>
-    <h2 id="usage">Usage</h2>
-    <h3 id="accessing-the-frontend">Accessing the Frontend</h3>
-Home Page: Navigate to <code>/</code> or <code>/Index</code> to view user data.
-Service Data Page: Navigate to <code>/ServiceData</code> to view service data.
-Contact Page: Navigate to <code>/Contact</code> to access the contact form.
-<h3 id="downloading-powershell-scripts">Downloading PowerShell Scripts</h3>
-On the Home or Service Data pages, click the Download Script button in the navbar.
-A modal will appear with information about the script.
-Acknowledge the disclaimer by checking the checkbox.
-Click Download to download the script.
-Rename the file from <code>.txt</code> to <code>.ps1</code> to execute the script.
-<h2 id="api-endpoints">API Endpoints</h2>
-    <h3 id="user-data-api">User Data API</h3>
-    <ul>
-        <li>
-            Get All User Data
-        <pre><code class="language-http">
-        GET /api/UserData
-        </code></pre>
-        </li>
-        <li>
-            Get user Data by Access level<pre><code class="lang-http">POST /api/UserData/accesslevel
-        </code></pre>
-            <strong>Request Body:</strong>
-        <pre><code class="language-json">
-        {
-        "RequesterAccessLevel">: "Admin" // or "User", "Guest"
-        }
-        </code></pre>
-            <h3 id="service-data-api">Service Data API</h3>
-        </li>
-        <li>
-            <p>Get Service Data by Access Level</p>
-        <pre><code class="language-http">
-        POST /api/ServiceData/accesslevel
-        </code></pre>
-            <p><strong>Request Body</strong></p>
-        <pre><code class="language-json">
-        {
-            "RequesterAccessLevel": "Admin" // or "User" or "Guest"
-        }
-        </code></pre>
-        </li>
-        <li>
-            Generate Service Data Records
-            <pre><code class="language-http">
-            POST /api/ServiceData/generate
-            </code></pre>
-        </li>
-    </ul>
+    <h3>App Settings for URLs</h3>
+    <p>In your `appsettings.json`, configure the following URLs for home page links:</p>
+    <pre><code class="language-json">
+{
+  "Settings": {
+    "PublicUrl": "https://localhost:7189",
+    "SupportEmail": "support@yourDomain.tld"
+  }
+}
+    </code></pre>
 </div>

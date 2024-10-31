@@ -1,0 +1,249 @@
+﻿@page
+@model FieldAccessPageModel
+@{
+    ViewData["Title"] = "Manage Field Access Levels";
+}
+
+<h1>@ViewData["Title"]</h1>
+<!-- Buttons -->
+<div class="d-flex justify-content-start mb-3">
+    @if (Model.IsLocalhost)
+    {
+        <button type="button" id="browseFileExplorerBtn" class="btn btn-info me-2">
+            Browse File Explorer
+        </button>
+    }
+
+    <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addFieldModal">
+        Add New Field Access
+    </button>
+
+    <!-- Button to Generate Default Field Access Records -->
+    <button type="button" class="btn btn-warning" id="generateFieldAccessButton">
+        Generate Default Field Access Records
+    </button>
+</div>
+
+
+<h2>Set Access Levels for Fields</h2>
+<table class="table table-striped" id="fieldAccessTable">
+    <thead>
+        <tr>
+            <th>Endpoint</th>
+            <th>Field Name</th>
+            <th>Access Level</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var access in Model.FieldAccessSettings)
+        {
+            <tr data-id="@access.Id">
+                <td>@access.Endpoint</td>
+                <td>@access.FieldName</td>
+                <td>@access.AccessLevel</td>
+                <td>
+                    <button class="btn btn-sm btn-warning editFieldAccessBtn">Edit</button>
+                    <button class="btn btn-sm btn-danger deleteFieldAccessBtn">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Add New Field Access Modal -->
+<div class="modal fade" id="addFieldModal" tabindex="-1" aria-labelledby="addFieldModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFieldModalLabel">Add New Field Access</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addFieldAccessForm">
+                    <div class="mb-3">
+                        <label for="endpointSelect" class="form-label">Endpoint</label>
+                        <select id="endpointSelect" class="form-control">
+                            <option value="">Select Endpoint</option>
+                            <option value="UserData">UserData</option>
+                            <option value="ServiceData">ServiceData</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fieldSelect" class="form-label">Field Name</label>
+                        <select id="fieldSelect" class="form-control">
+                            <option value="">Select Field</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="accessLevelSelect" class="form-label">Access Level</label>
+                        <select id="accessLevelSelect" class="form-control">
+                            <option value="Public">Public</option>
+                            <option value="Confidential">Confidential</option>
+                            <option value="Secret">Secret</option>
+                            <option value="TopSecret">TopSecret</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveAddBtn">Add Field Access</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Field Access Modal -->
+<div class="modal fade" id="updateFieldModal" tabindex="-1" aria-labelledby="updateFieldModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateFieldModalLabel">Update Field Access</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateFieldAccessForm">
+                    <div class="mb-3">
+                        <label for="updateAccessLevel" class="form-label">Access Level</label>
+                        <select id="updateAccessLevel" class="form-control">
+                            <option value="Public">Public</option>
+                            <option value="Confidential">Confidential</option>
+                            <option value="Secret">Secret</option>
+                            <option value="TopSecret">TopSecret</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="saveUpdateBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Load available fields when the endpoint dropdown changes
+            $('#endpointSelect').change(function () {
+                const endpoint = $(this).val();
+                if (endpoint) {
+                    $.ajax({
+                        url: `/api/FieldAccess/available-fields/${endpoint}`,
+                        type: 'GET',
+                        success: function (fields) {
+                            $('#fieldSelect').empty();
+                            $('#fieldSelect').append(new Option("Select Field", ""));
+                            fields.forEach(function (field) {
+                                $('#fieldSelect').append(new Option(field, field));
+                            });
+                        },
+                        error: function (xhr) {
+                            alert(`Error loading fields: ${xhr.responseText}`);
+                        }
+                    });
+                } else {
+                    $('#fieldSelect').empty();
+                    $('#fieldSelect').append(new Option("Select Field", ""));
+                }
+            });
+            // Handle Generate Field Access button click
+            $('#generateFieldAccessButton').click(function () {
+                if (confirm('This will reset all existing field access records to default. Proceed?')) {
+                    $.ajax({
+                        url: '/api/FieldAccess/generate',
+                        type: 'POST',
+                        success: function (response) {
+                            // Safeguard: Check if a response message exists before alerting
+                            if (response && response.Message) {
+                                alert(response.Message);
+                            } else {
+                                console.log("FieldAccess records generated successfully, but no message received.");
+                            }
+                            // Reload table or page to reflect changes
+                            location.reload();
+                        },
+                        error: function (xhr, status, error) {
+                            console.error('Error generating field access records:', error);
+                            alert('Failed to generate field access records. Please check the console for more details.');
+                        }
+                    });
+                }
+            });
+
+            // Add new field access setting
+            $('#saveAddBtn').click(function () {
+                const newAccess = {
+                    Endpoint: $('#endpointSelect').val(),
+                    FieldName: $('#fieldSelect').val(),
+                    AccessLevel: $('#accessLevelSelect').val()
+                };
+
+                if (!newAccess.Endpoint || !newAccess.FieldName || !newAccess.AccessLevel) {
+                    alert("Please fill in all fields.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/api/FieldAccess',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(newAccess),
+                    success: function () {
+                        $('#addFieldModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        alert(`Error: ${xhr.responseText}`);
+                    }
+                });
+            });
+
+            // Delete field access setting
+            $('#fieldAccessTable').on('click', '.deleteFieldAccessBtn', function () {
+                const id = $(this).closest('tr').data('id');
+                $.ajax({
+                    url: `/api/FieldAccess/${id}`,
+                    type: 'DELETE',
+                    success: function () {
+                        location.reload();
+                    }
+                });
+            });
+
+            // Edit field access setting
+            let currentEditId;
+            $('#fieldAccessTable').on('click', '.editFieldAccessBtn', function () {
+                currentEditId = $(this).closest('tr').data('id');
+                const currentAccessLevel = $(this).closest('tr').find('td:eq(2)').text();
+                $('#updateAccessLevel').val(currentAccessLevel);
+                $('#updateFieldModal').modal('show');
+            });
+
+            // Save updated access level
+            $('#saveUpdateBtn').click(function () {
+                const updatedAccessLevel = $('#updateAccessLevel').val();
+                $.ajax({
+                    url: `/api/FieldAccess/${currentEditId}`,
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ Id: currentEditId, AccessLevel: updatedAccessLevel }),
+                    success: function () {
+                        $('#updateFieldModal').modal('hide');
+                        location.reload();
+                    },
+                    error: function (xhr) {
+                        alert(`Error updating access level: ${xhr.responseText}`);
+                    }
+                });
+            });
+
+            // Open file explorer (only for localhost)
+            $('#browseFileExplorerBtn').click(function () {
+                $.get('/api/FieldAccess/browse-explorer');
+            });
+        });
+    </script>
+}

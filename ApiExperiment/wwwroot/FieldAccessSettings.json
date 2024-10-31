@@ -1,0 +1,50 @@
+[
+  {
+    "Id": 1,
+    "Endpoint": "UserData",
+    "FieldName": "PhoneNum",
+    "AccessLevel": 1
+  },
+  {
+    "Id": 2,
+    "Endpoint": "UserData",
+    "FieldName": "UserEmail",
+    "AccessLevel": 2
+  },
+  {
+    "Id": 3,
+    "Endpoint": "UserData",
+    "FieldName": "FullName",
+    "AccessLevel": 3
+  },
+  {
+    "Id": 4,
+    "Endpoint": "UserData",
+    "FieldName": "Address",
+    "AccessLevel": 4
+  },
+  {
+    "Id": 5,
+    "Endpoint": "ServiceData",
+    "FieldName": "Service",
+    "AccessLevel": 1
+  },
+  {
+    "Id": 6,
+    "Endpoint": "ServiceData",
+    "FieldName": "Address",
+    "AccessLevel": 2
+  },
+  {
+    "Id": 7,
+    "Endpoint": "ServiceData",
+    "FieldName": "IPAddress",
+    "AccessLevel": 3
+  },
+  {
+    "Id": 8,
+    "Endpoint": "ServiceData",
+    "FieldName": "IPGateway",
+    "AccessLevel": 4
+  }
+]

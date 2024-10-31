@@ -246,8 +246,13 @@
                         url: '/api/UserData/generate',
                         type: 'POST',
                         success: function (response) {
-                            alert(response.Message);
-                            // Refresh the table
+                            // Safeguard: Check if a response message exists before alerting
+                            if (response && response.Message) {
+                                alert(response.Message);
+                            } else {
+                                console.log("Success but no message received");
+                            }
+                            // Refresh the table or data
                             loadUserData();
                         },
                         error: function (xhr, status, error) {
@@ -257,6 +262,7 @@
                     });
                 }
             });
+
 
             // Handle form submission inside the create modal
             $('#submitCreateForm').click(function () {

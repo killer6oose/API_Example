@@ -263,14 +263,19 @@
             // Initial load of service data
             loadServiceData();
 
-            // Handle Generate Records button click
+            // Handle Generate Service Records button click
             $('#generateServiceRecordsButton').click(function () {
                 if (confirm('This will delete all existing service records and generate 50 new ones. Proceed?')) {
                     $.ajax({
                         url: '/api/ServiceData/generate',
                         type: 'POST',
                         success: function (response) {
-                            alert(response.Message);
+                            // Safeguard: Check if a response message exists before alerting
+                            if (response && response.Message) {
+                                alert(response.Message);
+                            } else {
+                                console.log("ServiceData records generated successfully, but no message received.");
+                            }
                             // Refresh the table
                             loadServiceData();
                         },
@@ -281,6 +286,7 @@
                     });
                 }
             });
+
 
             // Handle form submission inside the create modal
             $('#submitCreateServiceForm').click(function () {

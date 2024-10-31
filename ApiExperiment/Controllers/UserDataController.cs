@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using ApiExperiment.Services;
 using ApiExperiment.Models;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace ApiExperiment.Controllers
 {
@@ -220,15 +221,19 @@ namespace ApiExperiment.Controllers
                     return NotFound("User not found.");
                 }
 
-                // Check access levels
-                if (request.RequesterAccessLevel >= user.AccessLevel)
+                // Load field access settings from JSON file
+                var settingsJson = System.IO.File.ReadAllText("FieldAccessSettings.json");
+                var fieldAccessSettings = JsonConvert.DeserializeObject<List<FieldAccessModel>>(settingsJson);
+
+                var response = new Dictionary<string, object>();
+
+                foreach (var field in fieldAccessSettings)
                 {
-                    return Ok(user);
+                    var fieldValue = user.GetType().GetProperty(field.FieldName)?.GetValue(user, null);
+                    response[field.FieldName] = request.RequesterAccessLevel >= field.AccessLevel ? fieldValue : "No Access";
                 }
-                else
-                {
-                    return Forbid("You do not have sufficient access level to view this data.");
-                }
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
@@ -236,6 +241,7 @@ namespace ApiExperiment.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
 
         /// <summary>
         /// Retrieves user data filtered by access level with hierarchical access control.

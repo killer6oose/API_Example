@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 
 namespace ApiExperiment.Models
 {
@@ -15,8 +17,10 @@ namespace ApiExperiment.Models
         public AccessLevel RequesterAccessLevel { get; set; }
 
         /// <summary>
-        /// The email address of the user making the request.
+        /// The email address of the user the request is for. While yes it shows "nullable = true" you MUST include an email address thats valid (check out the /servicedata page for valid accounts
         /// </summary>
-        public string UserEmail { get; set; }
+        [EmailAddress] //valid email format
+        public required string UserEmail { get; set; } = string.Empty;
     }
 }
+ 
