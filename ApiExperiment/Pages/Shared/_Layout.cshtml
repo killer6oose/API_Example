@@ -1,5 +1,4 @@
-﻿@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
-@* File: Pages/Shared/_Layout.cshtml *@
+﻿@* File: Pages/Shared/_Layout.cshtml *@
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.css" />
 
-       <!-- Custom Styles -->
+    <!-- Custom Styles -->
     <style>
         /* Spinner Overlay Styles */
         .spinner-overlay {
@@ -39,36 +38,36 @@
             padding: 3px;
             margin-top: 5px;
         }
-    /* Adjust the position and appearance of the Prism.js toolbar */
-    .prism-toolbar {
-        position: absolute;
-        top: 0;
-        right: 0;
-        padding: 2px;
-    }
+        /* Adjust the position and appearance of the Prism.js toolbar */
+        .prism-toolbar {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 2px;
+        }
 
-    /* Style the Copy button */
-    .prism-toolbar .prism-toolbar-button {
-        background-color: #343a40; /* Dark background */
-        color: #ffffff; /* White text */
-        border: none;
-        padding: 2px 2px;
-        font-size: 0.85rem;
-        cursor: pointer;
-    }
+            /* Style the Copy button */
+            .prism-toolbar .prism-toolbar-button {
+                background-color: #343a40; /* Dark background */
+                color: #ffffff; /* White text */
+                border: none;
+                padding: 2px 2px;
+                font-size: 0.85rem;
+                cursor: pointer;
+            }
 
-    .prism-toolbar .prism-toolbar-button:hover {
-        background-color: #495057; /* Slightly lighter on hover */
-    }
+                .prism-toolbar .prism-toolbar-button:hover {
+                    background-color: #495057; /* Slightly lighter on hover */
+                }
 
-    /* Ensure the toolbar is visible over code blocks */
-    pre[class*="language-"] {
-        position: relative;
-        padding-top: 2.5rem; /* Adjust padding to make room for the toolbar */
-    }
-</style>
+        /* Ensure the toolbar is visible over code blocks */
+        pre[class*="language-"] {
+            position: relative;
+            padding-top: 2.5rem; /* Adjust padding to make room for the toolbar */
+        }
+    </style>
 
-  <!-- DataTables CSS -->
+    <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 
     @RenderSection("Styles", false)
@@ -102,11 +101,6 @@
             // For other pages, do not show the download button
             showDownloadButton = false;
         }
-
-        // Get the AzureAd ClientId from the configuration
-        string azureClientId = Configuration["AzureAd:ClientId"];
-        bool hasAzureClientId = !string.IsNullOrEmpty(azureClientId);
-        var supportEmail = Configuration["Settings:SupportEmail"];
     }
 
     <!-- Navbar -->
@@ -138,16 +132,7 @@
 
                     <!-- Contact Navigation Item -->
                     <li class="nav-item @(currentPage == "/Contact" ? "active" : "")">
-                        @if (hasAzureClientId)
-                        {
-                            <!-- If ClientId exists, go to Contact page -->
-                            <a class="nav-link" href="/Contact">Contact Us</a>
-                        }
-                        else
-                        {
-                            <!-- If no ClientId, show mailto link -->
-                            <a class="nav-link" href="mailto:@supportEmail">Contact Us</a>
-                        }
+                        <a class="nav-link" href="/Contact">Contact Us</a>
                     </li>
                 </ul>
                 <!-- Align the buttons to the right -->
@@ -192,10 +177,9 @@
     <!-- Footer -->
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
-            <span class="text-muted">© 2024 - Example API Application by <a href="https://cronotech.us" target="_blank" style="text-decoration: none; color: inherit;">CronoTech Consulting LLC</a></span>
+            <span class="text-muted">© 2024 - User & Service Data API Application by CronoTech Consulting LLC</span>
         </div>
     </footer>
-
 
     <!-- Download Modal -->
     <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
@@ -228,7 +212,7 @@
         </div>
     </div>
 
-  <!-- jQuery Library -->
+    <!-- jQuery Library -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Bootstrap Bundle JS (includes Popper) -->
@@ -239,18 +223,18 @@
 
     @RenderSection("Scripts", required: false)
 
-        <!-- Prism.js Core -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <!-- Prism.js Core -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 
-<!-- Prism.js Language Components -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-http.min.js"></script>
+    <!-- Prism.js Language Components -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-http.min.js"></script>
 
-<!-- Prism.js Plugins -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+    <!-- Prism.js Plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/toolbar/prism-toolbar.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
 
     <!-- Modal Script -->
     <script>
