@@ -1,3 +1,32 @@
 [
-
+  {
+    "Endpoint": "null",
+    "FieldName": "PhoneNum",
+    "AccessLevel": 1
+  },
+  {
+    "Endpoint": "null",
+    "FieldName": "UserEmail",
+    "AccessLevel": 2
+  },
+  {
+    "Endpoint": "null",
+    "FieldName": "FullName",
+    "AccessLevel": 3
+  },
+  {
+    "Endpoint": "null",
+    "FieldName": "Address",
+    "AccessLevel": 4
+  },
+  {
+    "Endpoint": "UserData",
+    "FieldName": "PhoneNum",
+    "AccessLevel": 1
+  },
+  {
+    "Endpoint": "UserData",
+    "FieldName": "PhoneNum",
+    "AccessLevel": 1
+  }
 ]
