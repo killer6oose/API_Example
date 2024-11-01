@@ -1,5 +1,5 @@
 # Configuration for API endpoint
-$apiEndpoint = "http://kctest.cronotech.us/api/ServiceData/generate"
+$apiEndpoint = "http://api.cronotech.us/api/ServiceData/generate"
 
 # Function to send POST request to generate service records
 function Generate-ServiceRecords {

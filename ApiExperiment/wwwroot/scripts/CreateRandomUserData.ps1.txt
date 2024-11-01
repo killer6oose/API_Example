@@ -1,6 +1,6 @@
 # Script: CreateRandomUserData.ps1
 # Description: Generates 50 random user records with first and last names covering all 26 letters of the alphabet.
-# API Endpoint: http://kctest.cronotech.us/api/UserData
+# API Endpoint: http://api.cronotech.us/api/UserData
 
 # Function to generate a random full name
 function Get-RandomFullName {
