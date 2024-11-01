@@ -58,93 +58,122 @@ These instructions will help you set up the project on your local machine for de
 
    ```bash
    git clone https://github.com/killer6oose/API_Example.git
+   ```
+
 2. **Navigate to the Project Directory**
+
    ```bash
-    cd API_Example
-3. **Install Dependencies** - may not be required if VisualStudio takes care of it!
+   cd API_Example
+   ```
 
-    a.  Restore NuGet packages by running:
-    ```bash
-      cd dotnet restore
-    ```
-    
+3. **Install Dependencies** (may not be required if Visual Studio takes care of it)
+
+   ```bash
+   dotnet restore
+   ```
+
 ## Configuration
-### App Settings (For the Contact page, if you wish to use it yourself)
 
-Create an appsettings.json file in the root of the project if it doesn't exist, and add the following configuration:
+### App Settings
+
+Create an `appsettings.json` file in the root of the project if it doesn't exist, and add the following configuration:
+
 ```json
-    {
-      "AzureAd": {
-        "ClientId": "your-client-id",
-        "TenantId": "your-tenant-id",
-        "ClientSecret": "your-client-secret",
-        "SenderEmail": "your-email@example.com"
-        }
-    }
+{
+  "AzureAd": {
+    "ClientId": "your-client-id",
+    "TenantId": "your-tenant-id",
+    "ClientSecret": "your-client-secret",
+    "SenderEmail": "your-email@example.com"
+  },
+  "Settings": {
+    // Set the PublicUrl to your preferred URL instead of localhost:7189 for deployment
+    "PublicUrl": "https://localhost:7189",
+    "SupportEmail": "support@yourDomain.tld"
+  }
+}
 ```
-  
-  - ClientId, TenantId, ClientSecret: Required for Microsoft Graph API integration. You can obtain these by registering an application in Azure Active Directory.
-  - SenderEmail: The email address used to send emails via Microsoft Graph.
-If you are not using Microsoft Graph, you can remove or ignore this configuration and related code.
-### Running the Application
-  You can run the application using the .NET CLI or Visual Studio.
-  ## Using .NET CLI
-    ```bash
-    dotnet run
-    ```
-### Using Visual Studio
 
-  Open the solution file (`.sln`) in Visual Studio.
-  Set the startup project if not already set.
-  Press F5 to run the application in debug mode or Ctrl+F5 to run without debugging.
+- **ClientId**, **TenantId**, **ClientSecret**: Required for Microsoft Graph API integration. You can obtain these by registering an application in Azure Active Directory.
+- **SenderEmail**: The email address used to send emails via Microsoft Graph.
+- **PublicUrl**: Set to your preferred URL.
+
+### Running the Application
+
+You can run the application using the .NET CLI or Visual Studio.
+
+#### Using .NET CLI
+
+```bash
+dotnet run
+```
+
+#### Using Visual Studio
+
+Open the solution file (`.sln`) in Visual Studio. Set the startup project if not already set. Press **F5** to run the application in debug mode or **Ctrl+F5** to run without debugging.
 
 The console should now show you what port to browse.
+
 ## Usage
+
 ### Accessing the Frontend
 
-    Home Page: Navigate to / or /Index to view user data.
-    Service Data Page: Navigate to /ServiceData to view service data.
-    Contact Page: Navigate to /Contact to access the contact form.
+- **Home Page**: Navigate to `/` or `/Index` to view user data.
+- **Service Data Page**: Navigate to `/ServiceData` to view service data.
+- **Contact Page**: Navigate to `/Contact` to access the contact form.
 
 ### Downloading PowerShell Scripts
 
-    On the Home or Service Data pages, click the Download Script button in the navbar.
-    A modal will appear with information about the script.
-    Acknowledge the disclaimer by checking the checkbox.
-    Click Download to download the script.
-    Rename the file from .txt to .ps1 to execute the script.
+1. On the **Home** or **Service Data** pages, click the **Download Script** button in the navbar.
+2. A modal will appear with information about the script.
+3. Acknowledge the disclaimer by checking the checkbox.
+4. Click **Download** to download the script.
+5. Rename the file from `.txt` to `.ps1` to execute the script.
 
 ## API Endpoints
-Feel free to view the swagger page for detailed API endpoints: [https://api.cronotech.us/swagger](https://api.cronotech.us/swagger)
+
+Feel free to view the [Swagger page](https://api.cronotech.us/swagger) for detailed API endpoints.
 
 ### User Data API
-  - Get All User Data
-    ```http
-    GET /api/UserData
-    ```
-  - Get user Data by Access level
-    ```http
-    POST /api/UserData/accesslevel
-    ```
-    **Request Body:**
-    ```json
-    {
-      "RequesterAccessLevel": "Admin" // or "User", "Guest"
-    }
-    ```
-### Service Data API
-  - Get Service Data by Access Level
-    ```http
-    POST /api/ServiceData/accesslevel
 
-    ```
-    **Request Body**
-    ```json
-    {
-      "RequesterAccessLevel": "Admin" // or "User", "Guest"
-    }
-    ```
-  - Generate Service Data Records
-    ```http
-    POST /api/ServiceData/generate
-    ```
+- **Get All User Data**
+
+  ```bash
+  GET /api/UserData
+  ```
+
+- **Get User Data by Access Level**
+
+  ```bash
+  POST /api/UserData/accesslevel
+  ```
+
+  **Request Body:**
+
+  ```json
+  {
+    "RequesterAccessLevel": "Admin" // or "User", "Guest"
+  }
+  ```
+
+### Service Data API
+
+- **Get Service Data by Access Level**
+
+  ```bash
+  POST /api/ServiceData/accesslevel
+  ```
+
+  **Request Body:**
+
+  ```json
+  {
+    "RequesterAccessLevel": "Admin" // or "User", "Guest"
+  }
+  ```
+
+- **Generate Service Data Records**
+
+  ```json
+  POST /api/ServiceData/generate
+  ```
