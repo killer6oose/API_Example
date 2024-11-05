@@ -47,7 +47,11 @@ namespace ApiExperiment.Services
                 _logger.LogInformation("User data file already exists.");
             }
         }
-
+        public UserData GetUserDataById(string id)
+        {
+            var allUserData = GetAllUserData();
+            return allUserData.FirstOrDefault(u => u.Id == id);
+        }
         public UserData GenerateRandomUserData()
         {
             var firstNames = new[] { "James", "Mary", "John", "Patricia", "Robert", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Nancy", "Daniel", "Lisa", "Matthew", "Betty" };
@@ -158,6 +162,8 @@ namespace ApiExperiment.Services
                 try
                 {
                     var userDataList = GetAllUserData();
+                    int newIdNumber = userDataList.Count + 1;
+                    newData.Id = $"UD{newIdNumber}";
                     userDataList.Add(newData);
                     WriteToFile(userDataList);
                 }

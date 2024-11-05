@@ -1,11 +1,7 @@
 ﻿// File: Controllers/UserDataController.cs
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using ApiExperiment.Services;
 using ApiExperiment.Models;
-using Microsoft.Extensions.Logging;
+using ApiExperiment.Services;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
 namespace ApiExperiment.Controllers
@@ -90,7 +86,7 @@ namespace ApiExperiment.Controllers
         /// <summary>
         /// Updates existing user data at the specified index.
         /// </summary>
-        /// <param name="index">The index of the user data to update.</param>
+        /// <param name="id">The ID of the user data to update.</param>
         /// <param name="updatedData">The updated user data.</param>
         /// <returns>The updated user data.</returns>
         /// <response code="200">User data updated successfully.</response>
@@ -98,28 +94,19 @@ namespace ApiExperiment.Controllers
         /// <response code="404">User data not found.</response>
         /// <response code="500">Internal server error.</response>
         // PUT: api/UserData/{index}
-        [HttpPut("{index}")]
-        public IActionResult UpdateUserData(int index, [FromBody] UserData updatedData)
+        [HttpPut("{id}")]
+        public IActionResult UpdateUserData(string id, [FromBody] UserData updatedData)
         {
-            if (updatedData == null)
-            {
-                return BadRequest("Invalid user data.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             try
             {
                 var userDataList = _userDataService.GetAllUserData();
-                if (index < 0 || index >= userDataList.Count)
+                var userData = userDataList.FirstOrDefault(u => u.Id == id);
+                if (userData == null)
                 {
                     return NotFound("User data not found.");
                 }
 
-                userDataList[index] = updatedData;
+                updatedData.Id = id; // Ensure ID remains the same
                 _userDataService.UpdateUserData(userDataList);
                 return Ok(updatedData);
             }
@@ -133,23 +120,24 @@ namespace ApiExperiment.Controllers
         /// <summary>
         /// Deletes user data at the specified index.
         /// </summary>
-        /// <param name="index">The index of the user data to delete.</param>
+        /// <param name="id">The ID of the user data to delete.</param>
         /// <response code="204">User data deleted successfully.</response>
         /// <response code="404">User data not found.</response>
         /// <response code="500">Internal server error.</response>
         // DELETE: api/UserData/{index}
-        [HttpDelete("{index}")]
-        public IActionResult DeleteUserData(int index)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteUserData(string id)
         {
             try
             {
                 var userDataList = _userDataService.GetAllUserData();
-                if (index < 0 || index >= userDataList.Count)
+                var userData = userDataList.FirstOrDefault(u => u.Id == id);
+                if (userData == null)
                 {
                     return NotFound("User data not found.");
                 }
 
-                userDataList.RemoveAt(index);
+                userDataList.Remove(userData);
                 _userDataService.UpdateUserData(userDataList);
                 return NoContent();
             }
@@ -246,37 +234,58 @@ namespace ApiExperiment.Controllers
         /// <summary>
         /// Retrieves user data filtered by access level with hierarchical access control.
         /// </summary>
-        /// <param name="accessLevel">The access level of the requester (Public, Confidential, Secret, TopSecret).</param>
+        /// <param name="request">The access level of the requester (Public, Confidential, Secret, TopSecret).</param>
         /// <returns>A list of user data accessible by the specified access level, or higher.</returns>
         /// <response code="200">Returns the filtered user data.</response>
         /// <response code="400">Invalid access level provided.</response>
         /// <response code="500">Internal server error.</response>
         // GET: api/UserData/accesslevel/{accessLevel}
-        [HttpGet("accesslevel/{accessLevel}")]
-        public IActionResult GetUserDataByAccessLevel(string accessLevel)
+        // Retrieve user data by email with hierarchical access control.
+        [HttpPost("request")]
+        public IActionResult GetUserDataByAccessLevel([FromBody] UserDataRequest request)
         {
-            if (string.IsNullOrEmpty(accessLevel))
-                return BadRequest("Access level is required.");
+            if (request == null || string.IsNullOrEmpty(request.UserEmail))
+            {
+                return BadRequest("Invalid request data.");
+            }
 
             try
             {
-                AccessLevel accessLevelEnum = Enum.Parse<AccessLevel>(accessLevel, true);
+                var userDataList = _userDataService.GetAllUserData();
+                var user = userDataList.FirstOrDefault(u => u.UserEmail.Equals(request.UserEmail, StringComparison.OrdinalIgnoreCase));
 
-                var data = _userDataService.GetAllUserData()
-                    .Where(u => u.AccessLevel <= accessLevelEnum)
-                    .ToList();
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
 
-                return Ok(data);
-            }
-            catch (ArgumentException)
-            {
-                return BadRequest("Invalid access level. You do not have access to view this record.");
+                // Load field access settings from JSON file
+                var settingsJson = System.IO.File.ReadAllText("FieldAccessSettings.json");
+                var fieldAccessSettings = JsonConvert.DeserializeObject<List<FieldAccessModel>>(settingsJson);
+
+                if (request.RequesterAccessLevel >= user.AccessLevel)
+                {
+                    // Full access to the entire record
+                    return Ok(user);
+                }
+
+                // Partial access: filter fields based on field access level
+                var response = new Dictionary<string, object>();
+
+                foreach (var field in fieldAccessSettings)
+                {
+                    var fieldValue = user.GetType().GetProperty(field.FieldName)?.GetValue(user, null);
+                    response[field.FieldName] = request.RequesterAccessLevel >= field.AccessLevel ? fieldValue : "No Access";
+                }
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get user data by access level");
+                _logger.LogError(ex, "Failed to get user data by email with access control.");
                 return StatusCode(500, "Internal server error");
             }
         }
+
     }
 }

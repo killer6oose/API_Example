@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-
-namespace ApiExperiment.Helpers
+﻿namespace ApiExperiment.Helpers
 {
     public class MailHelper
     {

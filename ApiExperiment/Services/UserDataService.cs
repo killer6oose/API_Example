@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using ApiExperiment.Data;
+﻿using ApiExperiment.Data;
 using ApiExperiment.Models;
 
 namespace ApiExperiment.Services

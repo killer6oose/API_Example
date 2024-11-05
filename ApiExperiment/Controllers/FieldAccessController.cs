@@ -1,10 +1,6 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using ApiExperiment.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using ApiExperiment.Models;
 using System.Diagnostics;
 
 namespace ApiExperiment.Controllers

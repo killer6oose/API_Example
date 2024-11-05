@@ -17,10 +17,18 @@ namespace ApiExperiment.Models
         public AccessLevel RequesterAccessLevel { get; set; }
 
         /// <summary>
-        /// The email address of the user the request is for. While yes it shows "nullable = true" you MUST include an email address thats valid (check out the /servicedata page for valid accounts
+        /// The IP address of the user making the request.
         /// </summary>
-        [EmailAddress] //valid email format
-        public required string UserEmail { get; set; } = string.Empty;
+        public string IPAddress { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServiceDataRequest"/> class.
+        /// </summary>
+        /// <param name="ipAddress">The user's IP address.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="ipAddress"/> is null.</exception>
+        public ServiceDataRequest(string ipAddress)
+        {
+            IPAddress = IPAddress ?? throw new ArgumentNullException(nameof(ipAddress));
+        }
     }
 }
- 

@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System;
-using System.Collections.Generic;
-using ApiExperiment.Services;
 using ApiExperiment.Models;
+using ApiExperiment.Services;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace ApiExperiment.Pages
 {

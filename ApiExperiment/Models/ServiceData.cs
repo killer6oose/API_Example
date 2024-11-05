@@ -9,6 +9,17 @@ namespace ApiExperiment.Models
     public class ServiceData
     {
         /// <summary>
+        /// The index ID of the record
+        /// </summary>
+        [Required]
+        public string Id { get; set; }
+
+        public ServiceData()
+        {
+            // Generate a unique ID, e.g., SD1, SD2, etc.
+            Id = $"SD{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+        }
+        /// <summary>
         /// The name of the service.
         /// </summary>
         [Required]

@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ApiExperiment.Models;
+﻿using ApiExperiment.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ApiExperiment.Data
 {

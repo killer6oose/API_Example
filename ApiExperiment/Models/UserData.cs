@@ -9,6 +9,17 @@ namespace ApiExperiment.Models
     public class UserData
     {
         /// <summary>
+        /// The index ID of the record
+        /// </summary>
+        [Required]
+        public string Id { get; set; }
+
+        public UserData()
+        {
+            // Generate a unique ID, e.g., UD1, UD2, etc.
+            Id = $"UD{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+        }
+        /// <summary>
         /// The user's phone number.
         /// </summary>
         [Required]
