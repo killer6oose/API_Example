@@ -209,7 +209,13 @@ namespace ApiExperiment.Controllers
                     return NotFound("User not found.");
                 }
 
-                // Load field access settings from JSON file
+                // If requester's access level matches or exceeds the user record's access level, grant full access
+                if (request.RequesterAccessLevel >= user.AccessLevel)
+                {
+                    return Ok(user); // Full access to all fields
+                }
+
+                // Otherwise, apply field-level access control
                 var settingsJson = System.IO.File.ReadAllText("FieldAccessSettings.json");
                 var fieldAccessSettings = JsonConvert.DeserializeObject<List<FieldAccessModel>>(settingsJson);
 
@@ -229,6 +235,7 @@ namespace ApiExperiment.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
 
 
         /// <summary>
