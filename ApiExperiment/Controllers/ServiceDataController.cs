@@ -9,6 +9,7 @@ using System.Linq;
 
 namespace ApiExperiment.Controllers
 {
+
     /// <summary>
     /// Controller for handling service data operations.
     /// </summary>
@@ -35,7 +36,7 @@ namespace ApiExperiment.Controllers
             _userDataService = userDataService;
             _logger = logger;
         }
-
+        
         /// <summary>
         /// Retrieves all service data.
         /// </summary>
@@ -106,19 +107,24 @@ namespace ApiExperiment.Controllers
         [HttpPut("{index}")]
         public IActionResult UpdateServiceData(int index, [FromBody] ServiceData updatedData)
         {
+            _logger.LogInformation("Received request to update service data at index {Index}", index);
+
             if (updatedData == null)
             {
+                _logger.LogWarning("Update failed: Service data is null");
                 return BadRequest("Invalid service data.");
             }
 
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Update failed: Model state is invalid");
                 return BadRequest(ModelState);
             }
 
             try
             {
                 _serviceDataService.UpdateExistingServiceData(index, updatedData);
+                _logger.LogInformation("Service data updated successfully at index {Index}", index);
                 return Ok(updatedData);
             }
             catch (IndexOutOfRangeException ex)
@@ -173,38 +179,50 @@ namespace ApiExperiment.Controllers
         [HttpPost("request")]
         public IActionResult GetServiceDataByAccessLevel([FromBody] ServiceDataRequest request)
         {
-            if (request == null || string.IsNullOrEmpty(request.UserEmail))
+            if (request == null || string.IsNullOrEmpty(request.IPAddress))
             {
                 return BadRequest("Invalid request data.");
             }
 
             try
             {
-                // Retrieve service data accessible by the requester
-                var serviceDataList = _serviceDataService.GetAllServiceData()
-                    .Where(s => s.AccessLevel <= request.RequesterAccessLevel)
-                    .ToList();
+                var serviceDataList = _serviceDataService.GetAllServiceData();
+                var service = serviceDataList.FirstOrDefault(s => s.IPAddress.Equals(request.IPAddress, StringComparison.OrdinalIgnoreCase));
 
-                // Retrieve user data accessible by the requester
-                var userDataList = _userDataService.GetAllUserData()
-                    .Where(u => u.AccessLevel <= request.RequesterAccessLevel)
-                    .ToList();
-
-                // Combine both data sets
-                var combinedData = new
+                if (service == null)
                 {
-                    UserData = userDataList,
-                    ServiceData = serviceDataList
-                };
+                    return NotFound("Service data not found.");
+                }
 
-                return Ok(combinedData);
+                var response = FilterFieldsBasedOnAccess(service, request.RequesterAccessLevel);
+                return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get combined user and service data by access level. You do not have access to view this record");
+                _logger.LogError(ex, "Failed to get service data by IP address with access control.");
                 return StatusCode(500, "Internal server error");
             }
         }
+
+        private object FilterFieldsBasedOnAccess(ServiceData service, AccessLevel requesterAccessLevel)
+        {
+            // Check if requester has full access to the record based on the record's access level
+            if (requesterAccessLevel >= service.AccessLevel)
+            {
+                return service; // Full access, return the entire record
+            }
+
+            // Partial access: return only fields with access levels the requester is permitted to see
+            return new
+            {
+                serviceType = service.ServiceAccessLevel <= requesterAccessLevel ? service.Service : null,
+                address = service.AddressAccessLevel <= requesterAccessLevel ? service.Address : null,
+                ipAddress = service.IPAddressAccessLevel <= requesterAccessLevel ? service.IPAddress : null,
+                ipGateway = service.IPGatewayAccessLevel <= requesterAccessLevel ? service.IPGateway : null,
+                accessLevel = service.AccessLevel // Always include the record's access level
+            };
+        }
+
 
         /// <summary>
         /// Generates 50 new random service records.
@@ -253,16 +271,16 @@ namespace ApiExperiment.Controllers
         /// <summary>
         /// The email address of the user making the request.
         /// </summary>
-        public string UserEmail { get; set; }
+        public string IPAddress { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceDataRequest"/> class.
         /// </summary>
-        /// <param name="userEmail">The user's email address.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="userEmail"/> is null.</exception>
-        public ServiceDataRequest(string userEmail)
+        /// <param name="ipAddress">The service's IP address.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="ipAddress"/> is null.</exception>
+        public ServiceDataRequest(string ipAddress)
         {
-            UserEmail = userEmail ?? throw new ArgumentNullException(nameof(userEmail));
+            IPAddress = ipAddress ?? throw new ArgumentNullException(nameof(ipAddress));
         }
     }
 }

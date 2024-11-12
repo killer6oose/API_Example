@@ -262,21 +262,41 @@ namespace ApiExperiment.Controllers
             {
                 AccessLevel accessLevelEnum = Enum.Parse<AccessLevel>(accessLevel, true);
 
+                // Retrieve all user data records and filter based on access level
                 var data = _userDataService.GetAllUserData()
-                    .Where(u => u.AccessLevel <= accessLevelEnum)
+                    .Select(user => FilterFieldsBasedOnAccess(user, accessLevelEnum))
                     .ToList();
 
                 return Ok(data);
             }
             catch (ArgumentException)
             {
-                return BadRequest("Invalid access level. You do not have access to view this record.");
+                return BadRequest("Invalid access level.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get user data by access level");
+                _logger.LogError(ex, "Failed to get user data by access level.");
                 return StatusCode(500, "Internal server error");
             }
         }
+        private object FilterFieldsBasedOnAccess(UserData user, AccessLevel requesterAccessLevel)
+        {
+            // Check if requester has full access to the record based on the record's access level
+            if (requesterAccessLevel >= user.AccessLevel)
+            {
+                return user; // Full access, return the entire record
+            }
+
+            // Partial access: return only fields with access levels the requester is permitted to see
+            return new
+            {
+                phoneNum = user.PhoneNumAccessLevel <= requesterAccessLevel ? user.PhoneNum : null,
+                userEmail = user.UserEmailAccessLevel <= requesterAccessLevel ? user.UserEmail : null,
+                fullName = user.FullNameAccessLevel <= requesterAccessLevel ? user.FullName : null,
+                address = user.AddressAccessLevel <= requesterAccessLevel ? user.Address : null,
+                accessLevel = user.AccessLevel // Always include the record's access level
+            };
+        }
     }
 }
+
