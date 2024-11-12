@@ -2,14 +2,10 @@
 using ApiExperiment.Models;
 using ApiExperiment.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Newtonsoft.Json;
 
 namespace ApiExperiment.Controllers
 {
-
     /// <summary>
     /// Controller for handling service data operations.
     /// </summary>
@@ -36,7 +32,7 @@ namespace ApiExperiment.Controllers
             _userDataService = userDataService;
             _logger = logger;
         }
-        
+
         /// <summary>
         /// Retrieves all service data.
         /// </summary>
@@ -96,41 +92,34 @@ namespace ApiExperiment.Controllers
         /// <summary>
         /// Updates existing service data at the specified index.
         /// </summary>
-        /// <param name="index">The index of the service data to update.</param>
+        /// <param name="id">The ID of the service data to update.</param>
         /// <param name="updatedData">The updated service data.</param>
         /// <returns>The updated service data.</returns>
         /// <response code="200">Service data updated successfully.</response>
         /// <response code="400">Invalid service data provided.</response>
         /// <response code="404">Service data not found.</response>
         /// <response code="500">Internal server error.</response>
-        // PUT: api/ServiceData/{index}
-        [HttpPut("{index}")]
-        public IActionResult UpdateServiceData(int index, [FromBody] ServiceData updatedData)
+        // PUT: api/ServiceData/{id}
+        [HttpPut("{id}")]
+        public IActionResult UpdateServiceData(string id, [FromBody] ServiceData updatedData)
         {
-            _logger.LogInformation("Received request to update service data at index {Index}", index);
-
-            if (updatedData == null)
-            {
-                _logger.LogWarning("Update failed: Service data is null");
-                return BadRequest("Invalid service data.");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                _logger.LogWarning("Update failed: Model state is invalid");
-                return BadRequest(ModelState);
-            }
-
             try
             {
-                _serviceDataService.UpdateExistingServiceData(index, updatedData);
-                _logger.LogInformation("Service data updated successfully at index {Index}", index);
+                var serviceDataList = _serviceDataService.GetAllServiceData();
+                var serviceData = serviceDataList.FirstOrDefault(u => u.Id == id);
+
+                if (serviceData == null)
+                {
+                    return NotFound("Service data not found.");
+                }
+
+                // Copy updated fields but keep the same ID
+                updatedData.Id = id;
+                serviceDataList[serviceDataList.IndexOf(serviceData)] = updatedData;
+
+                // Update the file with the modified list
+                _serviceDataService.UpdateServiceData(serviceDataList);
                 return Ok(updatedData);
-            }
-            catch (IndexOutOfRangeException ex)
-            {
-                _logger.LogError(ex, "Service data index out of range.");
-                return NotFound("Service data not found.");
             }
             catch (Exception ex)
             {
@@ -142,23 +131,30 @@ namespace ApiExperiment.Controllers
         /// <summary>
         /// Deletes service data at the specified index.
         /// </summary>
-        /// <param name="index">The index of the service data to delete.</param>
+        /// <param name="id">The ID of the service data to delete.</param>
         /// <response code="204">Service data deleted successfully.</response>
         /// <response code="404">Service data not found.</response>
         /// <response code="500">Internal server error.</response>
         // DELETE: api/ServiceData/{index}
-        [HttpDelete("{index}")]
-        public IActionResult DeleteServiceData(int index)
+        [HttpDelete("{id}")]
+        public IActionResult DeleteServiceData(string id)
         {
             try
             {
-                _serviceDataService.DeleteServiceData(index);
+                var serviceDataList = _serviceDataService.GetAllServiceData();
+                var serviceData = serviceDataList.FirstOrDefault(u => u.Id == id);
+
+                if (serviceData == null)
+                {
+                    return NotFound("Service data not found.");
+                }
+
+                // Remove the service data from the list
+                serviceDataList.Remove(serviceData);
+
+                // Update the file with the modified list
+                _serviceDataService.UpdateServiceData(serviceDataList);
                 return NoContent();
-            }
-            catch (IndexOutOfRangeException ex)
-            {
-                _logger.LogError(ex, "Service data index out of range.");
-                return NotFound("Service data not found.");
             }
             catch (Exception ex)
             {
@@ -187,40 +183,39 @@ namespace ApiExperiment.Controllers
             try
             {
                 var serviceDataList = _serviceDataService.GetAllServiceData();
-                var service = serviceDataList.FirstOrDefault(s => s.IPAddress.Equals(request.IPAddress, StringComparison.OrdinalIgnoreCase));
+                var serviceData = serviceDataList.FirstOrDefault(s => s.IPAddress.Equals(request.IPAddress, StringComparison.OrdinalIgnoreCase));
 
-                if (service == null)
+                if (serviceData == null)
                 {
                     return NotFound("Service data not found.");
                 }
 
-                var response = FilterFieldsBasedOnAccess(service, request.RequesterAccessLevel);
+                // Load field access settings from JSON file
+                var settingsJson = System.IO.File.ReadAllText("FieldAccessSettings.json");
+                var fieldAccessSettings = JsonConvert.DeserializeObject<List<FieldAccessModel>>(settingsJson);
+
+                if (request.RequesterAccessLevel >= serviceData.AccessLevel)
+                {
+                    // Full access to the entire record
+                    return Ok(serviceData);
+                }
+
+                // Partial access: filter fields based on field access level
+                var response = new Dictionary<string, object>();
+
+                foreach (var field in fieldAccessSettings)
+                {
+                    var fieldValue = serviceData.GetType().GetProperty(field.FieldName)?.GetValue(serviceData, null);
+                    response[field.FieldName] = request.RequesterAccessLevel >= field.AccessLevel ? fieldValue : "No Access";
+                }
+
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to get service data by IP address with access control.");
+                _logger.LogError(ex, "Failed to get service data by access level.");
                 return StatusCode(500, "Internal server error");
             }
-        }
-
-        private object FilterFieldsBasedOnAccess(ServiceData service, AccessLevel requesterAccessLevel)
-        {
-            // Check if requester has full access to the record based on the record's access level
-            if (requesterAccessLevel >= service.AccessLevel)
-            {
-                return service; // Full access, return the entire record
-            }
-
-            // Partial access: return only fields with access levels the requester is permitted to see
-            return new
-            {
-                serviceType = service.ServiceAccessLevel <= requesterAccessLevel ? service.Service : null,
-                address = service.AddressAccessLevel <= requesterAccessLevel ? service.Address : null,
-                ipAddress = service.IPAddressAccessLevel <= requesterAccessLevel ? service.IPAddress : null,
-                ipGateway = service.IPGatewayAccessLevel <= requesterAccessLevel ? service.IPGateway : null,
-                accessLevel = service.AccessLevel // Always include the record's access level
-            };
         }
 
 
@@ -271,16 +266,17 @@ namespace ApiExperiment.Controllers
         /// <summary>
         /// The email address of the user making the request.
         /// </summary>
-        public string IPAddress { get; set; }
+        public string UserEmail { get; set; }
+        public string? IPAddress { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceDataRequest"/> class.
         /// </summary>
-        /// <param name="ipAddress">The service's IP address.</param>
-        /// <exception cref="ArgumentNullException">Thrown when <paramref name="ipAddress"/> is null.</exception>
-        public ServiceDataRequest(string ipAddress)
+        /// <param name="userEmail">The user's email address.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="userEmail"/> is null.</exception>
+        public ServiceDataRequest(string userEmail)
         {
-            IPAddress = ipAddress ?? throw new ArgumentNullException(nameof(ipAddress));
+            UserEmail = userEmail ?? throw new ArgumentNullException(nameof(userEmail));
         }
     }
 }

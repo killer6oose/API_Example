@@ -47,7 +47,11 @@ namespace ApiExperiment.Services
                 _logger.LogInformation("Service data file already exists.");
             }
         }
-
+        public ServiceData GetServiceDataById(string id)
+        {
+            var allServiceData = GetAllServiceData();
+            return allServiceData.FirstOrDefault(u => u.Id == id);
+        }
         public ServiceData GenerateRandomServiceData()
         {
             var services = new[] { "Server", "Telephone", "Computer", "Printer", "Router" };
@@ -135,6 +139,8 @@ namespace ApiExperiment.Services
                 try
                 {
                     var serviceDataList = GetAllServiceData();
+                    int newIdNumber = serviceDataList.Count + 1;
+                    newData.Id = $"SD{newIdNumber}";
                     serviceDataList.Add(newData);
                     WriteToFile(serviceDataList);
                 }

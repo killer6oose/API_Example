@@ -1,11 +1,7 @@
 ﻿using Azure.Identity;
 using Microsoft.Graph;
-using Microsoft.Extensions.Configuration;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.Graph.Models;
 using Microsoft.Graph.Users.Item.SendMail;
-using System;
 
 namespace ApiExperiment.Helpers
 {

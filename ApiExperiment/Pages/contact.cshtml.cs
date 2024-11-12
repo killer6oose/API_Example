@@ -1,7 +1,6 @@
 using ApiExperiment.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Serilog.Core;
 
 namespace ApiExperiment.Pages
 {
