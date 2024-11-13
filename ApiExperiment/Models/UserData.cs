@@ -53,16 +53,10 @@ namespace ApiExperiment.Models
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public AccessLevel AccessLevel { get; set; }
 
-        // Add access levels for each field (these could be set dynamically in the admin page)
-        /// <summary>
-        ///  The individual field's access level, if you have Access Level 'Public' you will be able to retrieve the phoneNum field data
-        /// </summary>
-        public static Dictionary<string, AccessLevel> FieldAccessLevels = new Dictionary<string, AccessLevel>
-        {
-            { nameof(PhoneNum), AccessLevel.Public },
-            { nameof(UserEmail), AccessLevel.Confidential },
-            { nameof(FullName), AccessLevel.Secret },
-            { nameof(Address), AccessLevel.TopSecret }
-        };
+        // Field-specific access levels
+        public AccessLevel PhoneNumAccessLevel { get; set; }
+        public AccessLevel UserEmailAccessLevel { get; set; }
+        public AccessLevel FullNameAccessLevel { get; set; }
+        public AccessLevel AddressAccessLevel { get; set; }
     }
 }

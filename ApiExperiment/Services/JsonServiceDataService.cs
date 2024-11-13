@@ -207,21 +207,29 @@ namespace ApiExperiment.Services
                 try
                 {
                     var serviceDataList = GetAllServiceData();
+
+                    // Log current data count and the index for clarity
+                    _logger.LogInformation($"Updating service data at index {index}. Total records: {serviceDataList.Count}");
+
+                    // Check for valid index
                     if (index < 0 || index >= serviceDataList.Count)
                     {
+                        _logger.LogWarning($"Attempted to update at index {index}, which is out of range.");
                         throw new IndexOutOfRangeException("Service data index out of range.");
                     }
 
+                    // Perform the update
                     serviceDataList[index] = updatedData;
                     UpdateServiceData(serviceDataList);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error updating service data.");
+                    _logger.LogError(ex, $"Error updating service data at index {index}.");
                     throw;
                 }
             }
         }
+
 
         private void WriteToFile(List<ServiceData> data)
         {
