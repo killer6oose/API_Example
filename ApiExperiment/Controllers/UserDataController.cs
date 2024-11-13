@@ -209,16 +209,16 @@ namespace ApiExperiment.Controllers
                     return NotFound("User not found.");
                 }
 
-                // If requester's access level matches or exceeds the user record's access level, grant full access
+                // Check if the requester's access level meets or exceeds the user's access level
                 if (request.RequesterAccessLevel >= user.AccessLevel)
                 {
-                    return Ok(user); // Full access to all fields
+                    // Grant full access to the entire record
+                    return Ok(user);
                 }
 
-                // Otherwise, apply field-level access control
+                // If the requester's access level does not meet the required level, limit access based on individual fields
                 var settingsJson = System.IO.File.ReadAllText("FieldAccessSettings.json");
                 var fieldAccessSettings = JsonConvert.DeserializeObject<List<FieldAccessModel>>(settingsJson);
-
                 var response = new Dictionary<string, object>();
 
                 foreach (var field in fieldAccessSettings)
@@ -236,22 +236,20 @@ namespace ApiExperiment.Controllers
             }
         }
 
-
-
         /// <summary>
         /// Retrieves user data filtered by access level with hierarchical access control.
         /// </summary>
-        /// <param name="request">The access level of the requester (Public, Confidential, Secret, TopSecret).</param>
+        /// <param name="accesslevel">The access level of the requester (Public, Confidential, Secret, TopSecret).</param>
         /// <returns>A list of user data accessible by the specified access level, or higher.</returns>
         /// <response code="200">Returns the filtered user data.</response>
         /// <response code="400">Invalid access level provided.</response>
         /// <response code="500">Internal server error.</response>
         // GET: api/UserData/accesslevel/{accessLevel}
         // Retrieve user data by email with hierarchical access control.
-        [HttpPost("request")]
-        public IActionResult GetUserDataByAccessLevel([FromBody] UserDataRequest request)
+        [HttpPost("accesslevel/{accessLevel}")]
+        public IActionResult GetUserDataByAccessLevel([FromBody] UserDataRequest accesslevel)
         {
-            if (request == null || string.IsNullOrEmpty(request.UserEmail))
+            if (accesslevel == null || string.IsNullOrEmpty(accesslevel.UserEmail))
             {
                 return BadRequest("Invalid request data.");
             }
@@ -259,7 +257,7 @@ namespace ApiExperiment.Controllers
             try
             {
                 var userDataList = _userDataService.GetAllUserData();
-                var user = userDataList.FirstOrDefault(u => u.UserEmail.Equals(request.UserEmail, StringComparison.OrdinalIgnoreCase));
+                var user = userDataList.FirstOrDefault(u => u.UserEmail.Equals(accesslevel.UserEmail, StringComparison.OrdinalIgnoreCase));
 
                 if (user == null)
                 {
@@ -270,7 +268,7 @@ namespace ApiExperiment.Controllers
                 var settingsJson = System.IO.File.ReadAllText("FieldAccessSettings.json");
                 var fieldAccessSettings = JsonConvert.DeserializeObject<List<FieldAccessModel>>(settingsJson);
 
-                if (request.RequesterAccessLevel >= user.AccessLevel)
+                if (accesslevel.RequesterAccessLevel >= user.AccessLevel)
                 {
                     // Full access to the entire record
                     return Ok(user);
@@ -282,7 +280,7 @@ namespace ApiExperiment.Controllers
                 foreach (var field in fieldAccessSettings)
                 {
                     var fieldValue = user.GetType().GetProperty(field.FieldName)?.GetValue(user, null);
-                    response[field.FieldName] = request.RequesterAccessLevel >= field.AccessLevel ? fieldValue : "No Access";
+                    response[field.FieldName] = accesslevel.RequesterAccessLevel >= field.AccessLevel ? fieldValue : "No Access";
                 }
 
                 return Ok(response);

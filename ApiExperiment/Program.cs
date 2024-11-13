@@ -23,6 +23,8 @@ builder.Services.AddRazorPages();
 
 // Register MappingService
 builder.Services.AddControllers();
+//detailed logging
+builder.Logging.AddConsole();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
